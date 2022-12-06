@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+
+
+<form id="contact-form"  action="#">
+  루미가 받는 비행기 티켓 : <input type="text" name="ticket" placeholder="Name">
+  <button type="submit">submit</button>
+</form>
+
+
+<script type="module">
+
+  import { sayHello, handleFormValue } from "./004-first-citizen-as-result.js";
+
+  const form = document.getElementById('contact-form');
+
+  form.addEventListener('submit', callbackFunction);
+
+  function callbackFunction(event) {
+    event.preventDefault();
+    const myFormData = new FormData(event.target);
+    console.log('myFormData', myFormData);
+    const formDataObj = {};
+    myFormData.forEach((value, key) => (formDataObj[key] = value));
+    console.log(formDataObj);
+    const values = formDataObj;
+    alert('받는 티켓 : ' + JSON.stringify(values));
+
+    //받는 티켓 : 미국행, !미국행
+    //미국행일 때는 팔짝뛴다. 아닌 경우는 좌절한다.
+    const resultFunc = handleFormValue => (a) => {
+      console.log(a.ticket);
+      if (a.ticket === '미국행') {
+        alert('팔짝뛴다');
+      } else {
+        alert('좌절한다');
+      }
+    }
+    resultFunc(handleFormValue);
+
+
+
+</script>
+
+</body>
+</html>
