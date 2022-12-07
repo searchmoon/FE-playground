@@ -25,16 +25,16 @@ export const sayHello = () => {
   alert('hello');
 }
 
-// export const handleFormValue = function(successFunc){
-//   return function(values){
-//     console.log('submit values 던집니드아ㅏㅏㅏ', values);
-//     successFunc(values);
-//   }
-// }
+export const handleFormValue = function(successFunc){
+  return function(values){
+    console.log('submit values 던집니드아ㅏㅏㅏ', values);
+    successFunc(values);
+  }
+}
 // 이거랑 같아요.
-export const handleFormValue = (successFunc) => (values) => {
-  console.log('submit values 던집니드아ㅏㅏㅏ', values);
-  successFunc(values);
+export const handleFormValue = (successFunc) => (data) => {
+  console.log('submit values 던집니드아ㅏㅏㅏ', data);
+  successFunc(data);
 }
 
 // handleFormValue(sayHello)({name: 'moon', age: 30});

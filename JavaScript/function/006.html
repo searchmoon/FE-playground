@@ -33,16 +33,15 @@
 
     //받는 티켓 : 미국행, !미국행
     //미국행일 때는 팔짝뛴다. 아닌 경우는 좌절한다.
-    const resultFunc = handleFormValue => (a) => {
-      console.log(a.ticket);
-      if (a.ticket === '미국행') {
+    const resultFunc = handleFormValue(function (values) {
+      if (values.ticket === '미국행') {
         alert('팔짝뛴다');
       } else {
         alert('좌절한다');
       }
-    }
-    resultFunc(handleFormValue);
-
+    });
+    resultFunc(values);
+  }
 
 
 </script>
