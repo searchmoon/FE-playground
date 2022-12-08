@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+
+
+<form id="contact-form"  action="#">
+  이름 :<input type="text" name="name" placeholder="Name">
+  <br/>
+  국적 :<input type="text" name="country" placeholder="Name">
+  <button type="submit">submit</button>
+</form>
+
+
+<script type="module">
+
+  import { sayHello, handleFormValue } from "./004-first-citizen-as-result.js";
+
+  const form = document.getElementById('contact-form');
+
+  form.addEventListener('submit', callbackFunction);
+
+  function callbackFunction(event) {
+    event.preventDefault();
+    const myFormData = new FormData(event.target);
+    console.log('myFormData', myFormData);
+    const formDataObj = {};
+    myFormData.forEach((value, key) => (formDataObj[key] = value));
+    console.log(formDataObj);
+    const info = formDataObj;
+    alert('정보 : ' + JSON.stringify(info));
+
+    const resultFunc = handleFormValue(function (a) {
+      a.name && a.country && alert(`너는 ${a.country}에 사는 ${a.name}구나`);
+    });
+    resultFunc(info);
+  }
+
+  function add(a, b) {
+
+  }
+  const add = function(a, b) {
+
+  }
+
+</script>
+
+</body>
+</html>

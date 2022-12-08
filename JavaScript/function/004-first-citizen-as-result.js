@@ -32,10 +32,10 @@ export const handleFormValue = function(successFunc){
   }
 }
 // 이거랑 같아요.
-export const handleFormValue = (successFunc) => (data) => {
-  console.log('submit values 던집니드아ㅏㅏㅏ', data);
-  successFunc(data);
-}
+// export const handleFormValue = (successFunc) => (data) => {
+//   console.log('submit values 던집니드아ㅏㅏㅏ', data);
+//   successFunc(data);
+// }
 
 // handleFormValue(sayHello)({name: 'moon', age: 30});
 
