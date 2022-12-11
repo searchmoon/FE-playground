@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+
+<form id="contact-form"  action="#">
+  <input type="text" name="name" placeholder="Name">
+  <input type="text" name="password" placeholder="password">
+  <button type="submit">submit</button>
+</form>
+
+
+<script type="module">
+
+  import { sayHello, handleFormValue } from "./004-first-citizen-as-result.js";
+  //import 로 함수를 가져왔다.
+
+  const form = document.getElementById('contact-form');
+  form.addEventListener('submit', callbackFunction);
+
+  //addEventListener의 매개변수는 2개이다. 첫번째는 이벤트의 타입, 두번째는 이벤트를 수신할 객체이다. handleEvent() 메서드를 포함하는 객체 또는 js 함수여야 한다.
+  //fomm 태그의 submit 이벤트가 발생하면 callbackFunction이 실행된다.
+
+  function callbackFunction(event) {
+    event.preventDefault(); // 이벤트의 기본 동작을 막는다.
+
+    console.log('event', event);
+    console.log('event-target', event.target); //event.target은 이벤트가 실행된 대상인 form 태그를 가리킨다.
+    const myFormData = new FormData(event.target); //FormData는 form 태그의 데이터를 가져온 후 myFormData 변수에 할당한다.
+
+    const formDataObj = {}; // 빈 객체를 생성해주었다.
+    myFormData.forEach((value, key) => (formDataObj[key] = value));
+    console.log('formDataObj',formDataObj);
+    const values = formDataObj;
+    console.log('values', values);
+    sayHello();
+
+    // const resultFunc = handleFormValue(function(){
+    //   alert('전송 성공');
+    // });
+
+    const resultFunc = handleFormValue(() => alert('전송 성공'));
+
+    resultFunc(values);
+  };
+</script>
+</body>
+</html>
