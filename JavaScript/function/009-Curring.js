@@ -5,8 +5,8 @@
 // 커링은 함수를 호출하지 않는다. 단지 변환할 뿐.
 // 예제1
 function curry(f) {
-  return function(a) {
-    return function(b) {
+  return function (a) {
+    return function (b) {
       return f(a, b);
     };
   }
