@@ -45,14 +45,14 @@ plusFuncCurried(1)(2)(3); //6
 const plusFuncCurried = a => b => c => console.log(a + b + c) // 이렇게도 가능하다.
 
 //non-curried: 함수 실행 시 파라미터가 모자라도 문제 없이 실행이 가능함
-// 함수 정의 : func(a, b, c)
-// 함수 실행 : func(a)
-// 실행 결과 : func(a, undefined, undefined)
-
-//curried: 함수가 인수를 전부 받을 때까지 실행을 보류함.
-// 함수 정의 : func(a, b, c)
-// 함수 실행 : func(a)
-// 실행 결과 : func(a)상태에서 b 함수 입력 대기
+// // 함수 정의 : func(a, b, c)
+// // 함수 실행 : func(a)
+// // 실행 결과 : func(a, undefined, undefined)
+//
+// //curried: 함수가 인수를 전부 받을 때까지 실행을 보류함.
+// // 함수 정의 : func(a, b, c)
+// // 함수 실행 : func(a)
+// // 실행 결과 : func(a)상태에서 b 함수 입력 대기
 
 
 // 콜백함수와 커링의 차이:

@@ -1,5 +1,4 @@
 
-
 class 달리는것{
     constructor(이름){
         this.이름 = 이름;
