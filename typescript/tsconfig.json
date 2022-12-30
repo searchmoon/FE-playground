@@ -3,9 +3,6 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "target": "ES5",
-    "include": [
-      "*.ts"
-    ],
     "moduleResolution": "node",
     "outDir": "dist",
     "baseUrl": ".",
@@ -14,5 +11,5 @@
     "noImplicitAny": false,
     "paths": { "*": ["node_modules/*"] }
   },
-  "include": ["src/**/*"]
+
 }
