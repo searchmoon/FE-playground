@@ -1,5 +1,8 @@
 
 
+https://www.typescriptlang.org/
+typescript playground 치면 이 주소가 나오는데, 별도의 변환 없이 타입스크립트 코드를 바로 실행해볼 수 있다.
+
 # 기본기
 - TS : 깊이가 들어가다보면 깊이가 있을 수가 있어요.. 객체지향 어쩌고. interface, class(JS), type 정의, 제너릭 쪼금 이해? (삽질 -> 흙, 모래, 물) 
 - const 모종삽 : 삽<모래>, const 흙삽 : 삽<흙>, const 물삽 : 삽<물>
