@@ -42,7 +42,7 @@ console.log(obj.name.length) // 5
 console.log(obj.age?.length) // undefined
 
 
-// ?? Null 병합 연산자
+// ?? Nullish 병합 연산자
 // ??는 좌항의 피연산자가 null 또는 undefined일 경우 우항의 피연산자를 반환하고, 그렇지 않으면 좌항의 피연산자를 반환한다.
 const foo = null ?? 'default string';
 console.log(foo) // 'default string'
@@ -52,5 +52,18 @@ console.log(oper1) // 0
 const oper2 = 0 || 42;
 console.log(oper2) // 42
 // 논리합 연산자와의 차이. 구분 잘하기
+// '??' 와 '||'의 차이
+// ||는 첫 번째 truthy 값을 반환합니다.
+// ??는 첫 번째 정의된(defined) 값을 반환합니다.
+
+height = height ?? 100;
+
+let height = 0;
+
+console.log(height || 100); //100
+// height가 0이기 때문에 falthy한 값으로 취급되어 100이 출력됩니다.
+
+console.log(height ?? 100); //0
+// height가 0이라 falthy한 값이지만, undefined나 null이 아니기 때문에(falthy 하나 false는 아니기 때문에) 0이 출력됩니다.
 
 
