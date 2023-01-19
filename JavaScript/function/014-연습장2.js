@@ -23,6 +23,25 @@ console.log(officerfilter2); // [ 'Captain', 'General', 'Admiral', 'Commander' ]
 const officersfilter3 = officers.reduce((acc, cur) =>  acc + cur.id);
 console.log(officersfilter3);   // ????? [object Object]5688  왜 이르케 나오지? ㅎ
 
+// 1-4. reduce를 사용해서 map 처럼 쓰기
+const officersfilter4 = officers.reduce((acc, cur) => {
+  // return acc + Number(cur.id);
+  console.log('Number', cur.id);
+  return acc + cur.id;
+
+}, []);
+console.log(officersfilter4);
+
+// 1-5. reduce를 사용해서 filter 처럼 쓰기
+
+// const officersfilter5 = officers.reduce((acc, cur) => {
+//   const arr = [];
+//   if(cur.name.length < 14) {
+//     arr.push(cur.name);
+//     return arr;
+//   }
+// })
+// console.log('officersfilter5', officersfilter5);
 
 
 // 예제 2. from 부터 to 까지의 년을 배열로 반환
@@ -43,5 +62,13 @@ getYear(); //[
 //   '2018', '2019',
 //   '2020'
 // ] 이 배열이 나온다. 숫자 형태로 나오게 하려면 i.toString()에서 toString()만 빼면 된다.
+
+
+
+
+
+
+
+
 
 
