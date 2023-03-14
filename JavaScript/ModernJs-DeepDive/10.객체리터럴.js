@@ -163,14 +163,14 @@ console.log(person); // {name: "Lee"}
 
 // < 9. ES6에서 추가된 객체 리터럴의 확장 기능>
 //10-19 프로퍼티 축약 표현
-var x = 1, y = 2;
+let x = 1, y = 2;
 // ES5
-var obj = {
+let obj = {
   x: x,
   y: y
 };
 //ES6 부터는 이렇게 표현도 가능해졌다.
-var obj = {
+let obj = {
   x,
   y
 };
@@ -178,9 +178,9 @@ var obj = {
 console.log(obj); // {x: 1, y: 2}
 
 // 10-21
-var prefix = 'prop';
-var i = 0;
-var obj = {};
+let prefix = 'prop';
+let i = 0;
+let obj = {};
 
 // ES5
 // 계산된 프로퍼티 이름으로 프로퍼티 키 동적 생성
@@ -200,7 +200,7 @@ console.log(obj); // {prop-1: 1, prop-2: 2, prop-3: 3}
 
 //10-23
 // ES5
-var obj = {
+let obj = {
   name: 'Lee',
   sayHi: function() {
     console.log('Hi! ' + this.name);
