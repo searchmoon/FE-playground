@@ -471,6 +471,7 @@ console.log(count); // 1
 
 increase();
 console.log(count); // 2
+.
 
 
 
