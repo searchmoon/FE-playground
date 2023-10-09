@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DOM 예제 코드</title>
+    <style>
+      ul {
+        background-color: rgb(113, 137, 113);
+      }
+      li {
+        margin: 10px;
+        background-color: rgb(193, 223, 193);
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>DOM 예제</h1>
+    <ul id="parent">
+      parent text
+      <li id="firstChild">first text</li>
+      <li id="middleChild">middle text</li>
+      <li id="lastChild">last text</li>
+
+      <!-- DOM 이벤트 -->
+      <!-- 1. target과 currentTarget -->
+
+      <div id="parentDiv">
+        Parent Div
+        <button id="childButton">Click me!</button>
+      </div>
+      <!-- 2. stopPropagation()와 preventDefault() -->
+      <a href="https://www.google.com" id="sampleLink">Go to Google</a>
+      <button id="sampleButton">Submit</button>
+    </ul>
+    <!-- 버블링, 캡쳐링 -->
+    <h3>버블링, 캡쳐링</h3>
+    <div id="parent">
+      Parent
+      <button id="child">Child</button>
+    </div>
+    <div id="parent2">
+      Parent2
+      <button id="child2">Child2</button>
+    </div>
+    <!-- 이벤트 위임 -->
+    <ul id="itemList">
+      <li>Item 1</li>
+      <li>Item 2</li>
+      <li>Item 3</li>
+    </ul>
+
+    <script>
+      //DOM 이벤트
+      //1. target과 currentTarget
+      document
+        .getElementById("parentDiv")
+        .addEventListener("click", function (event) {
+          // this == event
+          console.log("target:", event.target); // <button id="childButton">Click me!</button>
+          console.log("currentTarget:", event.currentTarget); // <div id="parentDiv">...</div>
+        });
+
+      // 2. stopPropagation()와 preventDefault()
+      document
+        .getElementById("sampleLink")
+        .addEventListener("click", function (event) {
+          event.preventDefault(); // Prevents the link from navigating to Google
+          console.log("Link was clicked, but navigation was prevented.");
+        });
+
+      document
+        .getElementById("sampleButton")
+        .addEventListener("click", function (event) {
+          event.stopPropagation(); // Stops the click event from bubbling up to any parent elements
+          console.log("Button was clicked, but event propagation was stopped.");
+        });
+      // 버블링
+      document.getElementById("parent").addEventListener("click", function () {
+        alert("Parent Div Clicked!");
+      });
+
+      document.getElementById("child").addEventListener("click", function () {
+        alert("Button Clicked!");
+      });
+
+      //캡쳐링
+      document.getElementById("parent2").addEventListener(
+        "click",
+        function () {
+          alert("Parent Div Clicked during Capturing!");
+        },
+        true
+      ); // true를 설정하여 캡처링 단계에서 이벤트를 처리합니다.
+
+      document.getElementById("child2").addEventListener("click", function () {
+        alert("Button Clicked during Capturing!");
+      });
+      //버튼을 클릭하면 'Parent Div Clicked during Capturing!'가 먼저 표시되고, 이후 'Button Clicked during Capturing!'가 표시
+
+      //이벤트 위임
+      document
+        .getElementById("itemList")
+        .addEventListener("click", function (event) {
+          if (event.target.tagName === "LI") {
+            alert(event.target.textContent + " Clicked!");
+          }
+        });
+
+      const parent = document.getElementById("parent");
+      const firstChild = document.getElementById("firstChild");
+      const middleChild = document.getElementById("middleChild");
+      const lastChild = document.getElementById("lastChild");
+
+      //요소 검색하기
+      //getElementById()
+      console.log(parent); //위의 getElementById 참고
+      console.log(parent.textContent); // 하위 요소에 있는 textContent 다 불러옴
+
+      // DOM node 추가, 제거
+      // appendChild()사용
+      // lastChild의 뒤에 버튼 추가 (주어진 노드를 특정 부모 노드의 마지막 자식으로 추가)
+      const newLastChild = document.createElement("button");
+      newLastChild.textContent = "button1";
+      document.body.appendChild(newLastChild);
+
+      //insertBefore();
+      //주어진 노드를 특정 부모 노드의 지정된 자식 노드 앞에 추가
+      const newElement = document.createElement("button");
+      newElement.textContent = "button2";
+      const referenceElement = document.body.lastChild;
+      document.body.insertBefore(newElement, referenceElement);
+      //button1의 앞 위치에 위치하게 됨
+
+      //append(), prepend(), before()
+      const parentElement = document.body;
+      //append(): 주어진 요소나 문자열을 부모 요소의 마지막에 추가
+      const appendElement = document.createElement("p");
+      appendElement.textContent = "append element";
+      parentElement.append(appendElement);
+      //   parent.append(appendElement); 위치 확인
+
+      //prepend(): 주어진 요소나 문자열을 부모 요소의 처음에 추가
+      const prependElement = document.createElement("p");
+      prependElement.textContent = "Prepended Element";
+      parentElement.prepend(prependElement);
+
+      //before(): 주어진 요소나 문자열을 현재 요소 앞에 추가
+      const beforeElement = document.createElement("p");
+      beforeElement.textContent = "Inserted Before Element";
+      appendElement.before(beforeElement);
+      //   middleChild.before(beforeElement);
+
+      //append(): 여러 노드나 문자열을 추가할 수 있습니다.
+      //.append(1, 2, 3번 요소)
+      //appendChild(): 오직 하나의 노드만 추가할 수 있습니다.
+      //.appendChild(1번요소) 만 가능.
+
+      // Using append()
+      document.body.append(
+        "Some text",
+        document.createElement("hr"),
+        "more text"
+      );
+
+      // Using appendChild()
+      document.body.appendChild(document.createElement("p")).textContent =
+        "A new paragraph";
+
+      //removeChild()
+      // 주어진 노드를 부모 노드에서 제거
+      const elementToRemove = document.body.lastChild;
+      document.body.removeChild(elementToRemove);
+      // 여기서.removeChild(이것을) 지움
+
+      //remove()
+      // 현재 노드를 부모 노드에서 제거
+      elementToRemove.remove();
+      // 이것을.remove() 지움.
+
+      // 노드 객체의 프로퍼티
+      // parentNode
+      console.log(firstChild.parentNode); // <div id="parent">...</div>
+
+      // childNodes
+      console.log(parent.childNodes); // NodeList(7) [text, p#firstChild, text, p#middleChild, text, p#lastChild, text]
+
+      // firstChild
+      console.log(parent.firstChild); // <p id="firstChild">This is the first child.</p>
+
+      // lastChild
+      console.log(parent.lastChild); // <p id="lastChild">This is the last child.</p>
+
+      // nextSibling
+      console.log(firstChild.nextSibling); // text (줄바꿈 문자 또는 공백)
+      console.log(firstChild.nextSibling.nextSibling); // <p id="middleChild">This is the middle child.</p>
+
+      // previousSibling
+      console.log(lastChild.previousSibling); // text (줄바꿈 문자 또는 공백)
+      console.log(lastChild.previousSibling.previousSibling); // <p id="middleChild">This is the middle child.</p>
+
+      // nodeType
+      console.log(parent.nodeType); // 1 (요소 노드)
+      console.log(firstChild.firstChild.nodeType); // 3 (텍스트 노드)
+      console.log(document.nodeType); // 9 (Document)
+
+      // nodeValue
+      console.log(firstChild.firstChild.nodeValue); // "This is the first child."
+      console.log(parent.nodeValue); // null
+
+      // HTML 요소의 트리
+      // childNodes
+      console.log(parent.childNodes); // NodeList including text nodes and comment nodes
+
+      // parentElement
+      console.log(firstChild.parentElement); // <div id="parent">...</div>
+
+      // firstElementChild
+      console.log(parent.firstElementChild); // <p id="firstChild">This is the first child.</p>
+
+      // lastElementChild
+      console.log(parent.lastElementChild); // <p id="lastChild">This is the last child.</p>
+
+      // nextElementSibling
+      console.log(firstChild.nextElementSibling); // <p id="middleChild">This is the middle child.</p>
+
+      // previousElementSibling
+      console.log(lastChild.previousElementSibling); // <p id="middleChild">This is the middle child.</p>
+
+      // childElementCount
+      console.log(parent.childElementCount); // 3
+    </script>
+  </body>
+</html>
+
+
