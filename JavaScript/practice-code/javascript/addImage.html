@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>이미지 넣기</title>
+
+    <style></style>
+  </head>
+
+  <body>
+    <input type="file" id="imageInput" accept="image/*" />
+    <button id="selectButton">select Image</button>
+    <img id="previewImage" style="display: none" width="200" height="200" />
+
+    <script>
+      const imageInput = document.getElementById("imageInput");
+      const selectButton = document.getElementById("selectButton");
+      const previewImage = document.getElementById("previewImage");
+
+      imageInput.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        console.log(event.target);
+        console.log(event);
+
+        if (file) {
+          const reader = new FileReader();
+          console.log(reader);
+          reader.onload = (e) => {
+            console.log(e.target);
+            previewImage.src = e.target.result;
+            previewImage.style.display = "block";
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      uploadButton.addEventListener("click", () => {
+        if (imageInput.files.length > 0) {
+          const selectedImage = imageInput.files[0];
+          console.log("Selected Image:", selectedImage);
+        } else {
+          console.log("No image selected.");
+        }
+      });
+    </script>
+  </body>
+</html>

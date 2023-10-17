@@ -1,5 +1,5 @@
 import { ThemeProvider } from "styled-components";
-import { theme } from "../styles/theme";
+import { darkTheme, lightTheme } from "../styles/theme";
 import { useState } from "react";
 import styled from "styled-components";
 
@@ -11,7 +11,7 @@ function Theme() {
   };
 
   return (
-    <ThemeProvider theme={isDarkMode ? theme.darkTheme : theme.lightTheme}>
+    <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <Div>
         <p>theme</p>
         <button onClick={handleToggleTheme}>toggle theme</button>
