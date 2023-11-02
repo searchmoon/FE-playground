@@ -66,4 +66,3 @@ console.log(height || 100); //100
 console.log(height ?? 100); //0
 // height가 0이라 falthy한 값이지만, undefined나 null이 아니기 때문에(falthy 하나 false는 아니기 때문에) 0이 출력됩니다.
 
-
