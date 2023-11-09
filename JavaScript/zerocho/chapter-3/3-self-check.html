@@ -1,0 +1,57 @@
+<!-- 쿵쿵따 게임으로 바꾸기 -->
+<!-- 세글자가 아니면, 틀렸다고 표시, alert창에서 숫자를 입력을 안하고 취소를 누르면 실행이 안되게 하기 -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3장. DOM객체 다루기. 끝말잇기 게임</title>
+  </head>
+  <body>
+    <div><span id="order">1</span>번째 참가자</div>
+    <div>제시어: <span id="word"></span></div>
+    <input type="text" />
+    <button>입력</button>
+    <div>
+      <img src="./flowchart/3-7.png" style="width: 400px; margin-top: 300px" />
+    </div>
+    <script>
+      const number = Number(prompt("몇명이 참가하나요?")); //string으로 받아지기 때문에 number로 바꿔준다.
+
+      if (number) {
+        const $input = document.querySelector("input");
+        const $button = document.querySelector("button");
+        const $word = document.querySelector("#word");
+        const $order = document.querySelector("#order");
+
+        let word; // 제시어
+        let newWord; // 새로 입력한 단어
+        const handleClickButton = () => {
+          if ((!word || word[word.length - 1] === newWord[0]) && newWord.length === 3) {
+            //제시어가 비어있는가?, 올바른 단어인가?(전단어의 마지막글자와 새로운 단어의 첫번째글자 일치)
+            // 비어있을때의 로직
+            word = newWord;
+            $word.textContent = word;
+            const order = Number($order.textContent); //현재 순서
+            if (order + 1 > number) {
+              $order.textContent = 1;
+            } else {
+              $order.textContent = order + 1;
+            }
+          } else {
+            //올바르지 않은가
+            alert("틀렸어");
+          }
+          $input.value = "";
+          $input.focus();
+        };
+
+        const handleChangeInput = (e) => {
+          newWord = e.target.value;
+        };
+
+        $button.addEventListener("click", handleClickButton);
+        $input.addEventListener("input", handleChangeInput);
+      }
+    </script>
+  </body>
+</html>
