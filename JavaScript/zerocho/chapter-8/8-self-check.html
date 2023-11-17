@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>반응속도</title>
+    <style>
+      #screen {
+        width: 300px;
+        height: 200px;
+        text-align: center;
+        user-select: none;
+      }
+      #screen.waiting {
+        background-color: aqua;
+      }
+      #screen.ready {
+        background-color: red;
+        color: white;
+      }
+      #screen.now {
+        background-color: greenyellow;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="screen" class="waiting">클릭해서 시작하세요</div>
+    <div id="result"></div>
+    <script>
+      const $screen = document.querySelector("#screen");
+      const $result = document.querySelector("#result");
+      let startTime;
+      let endTime;
+      const records = [];
+      let timeoutId;
+
+      $screen.addEventListener("click", (event) => {
+        // let startTime;
+        // let endTime;
+        // 이렇게 startTime, endTime을 전역스코프 말고 함수안에 선언해도 될것이라고 생각하지만,
+        // 이 함수안에 선언을 하게되면, 함수가 실행되고 나면, 그 안에 있는 변수들은 사라져버리기 때문에
+        // 선언하는 위치를 잘 정해줘야한다. 제대로 동작이 안될 수 있다.
+        if (event.target.classList.contains("waiting")) {
+          //파랑
+          //   $result.textContent = "";
+          $screen.classList.remove("waiting");
+          $screen.classList.add("ready");
+
+          // 위의 두줄은 $screen.classList.replace("waiting", "ready");로 해줄수도있다.
+          $screen.textContent = "초록색이 되면 클릭하세요";
+          // 랜덤타이머로 시간설정해주고 그 시간이되면 초록색으로 바뀐다.
+          const timer = Math.floor(Math.random() * 1000 + 2000); //2-3초 사이
+          timeoutId = setTimeout(() => {
+            startTime = new Date();
+            $screen.classList.remove("ready");
+            $screen.classList.add("now");
+            $screen.textContent = "이제 클릭하세요";
+          }, timer);
+        } else if (event.target.classList.contains("ready")) {
+          //빨강
+          clearTimeout(timeoutId);
+          $screen.classList.replace("ready", "waiting");
+          $screen.textContent = "성급했어요";
+        } else if (event.target.classList.contains("now")) {
+          //초록
+          endTime = new Date();
+          const current = endTime - startTime;
+          records.push(current);
+          const average = records.reduce((acc, cur) => acc + cur, 0) / records.length;
+          $result.textContent = `${current}ms, 평균속도: ${average}입니다.`;
+          const topFive = records.sort((a, b) => a - b).slice(0, 5);
+          topFive.map((top, i) => {
+            $result.append(document.createElement("br"), `${i + 1}위: ${top}ms`);
+          });
+          console.log(records);
+          startTime = null;
+          endTime = null;
+          $screen.classList.replace("now", "waiting");
+          $screen.textContent = "클릭해서 시작하세요";
+        }
+      });
+    </script>
+  </body>
+</html>
