@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>틱택토</title>
+    <style>
+      table {
+        border-collapse: collapse;
+      }
+      td {
+        border: 1px solid black;
+        width: 40px;
+        height: 40px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      const $table = document.createElement("table");
+      const $result = document.createElement("div");
+      const rows = [];
+
+      //   arr = [
+      //     [$td, $td, $td],
+      //     [$td, $td, $td],
+      //     [$td, $td, $td],
+      //   ];
+
+      //   arr[0][1].textContent; // 이렇게 가져오는 방식을 사용하면 좋다.
+
+      let turn = "O";
+      const checkWinner = (target) => {
+        const rowIndex = target.parentNode.rowIndex; // tr의 행 인덱스
+        const cellIndex = target.cellIndex; // td의 열 인덱스 //event.target.cellIndex 자체적으로 가지고있다.
+        // 근데, td 에서 rowIndex는 안가지고 있기 때문에 td의 부모인 tr에는 가지고있기 때문에 parentNode.rowIndex 하면 됨
+        // 부모 요소는 parentNode, 자식요소는 children
+
+        // 세 칸 다 채워졌나?
+        let hasWinner = false; // 첫 시작은 false 로 시작하면 됨.
+        // 가로줄 검사
+        if (
+          rows[rowIndex][0].textContent === turn &&
+          rows[rowIndex][1].textContent === turn &&
+          rows[rowIndex][2].textContent === turn
+        ) {
+          hasWinner = true;
+        }
+        // 세로줄 검사
+        if (
+          rows[0][cellIndex].textContent === turn &&
+          rows[1][cellIndex].textContent === turn &&
+          rows[2][cellIndex].textContent === turn
+        ) {
+          hasWinner = true;
+        }
+        // 대각선 검사
+        if (
+          rows[0][0].textContent === turn &&
+          rows[1][1].textContent === turn &&
+          rows[2][2].textContent === turn
+        ) {
+          hasWinner = true;
+        }
+        if (
+          rows[0][2].textContent === turn &&
+          rows[1][1].textContent === turn &&
+          rows[2][0].textContent === turn
+        ) {
+          hasWinner = true;
+        }
+        return hasWinner;
+      };
+
+      const callback = (e) => {
+        // 칸에 이미 글자가 있으면 return 하기
+        if (e.target.textContent) return;
+        e.target.textContent = turn;
+
+        // 이 if문을 짧게 삼항연산자로:  turn = (turn === "O") ? "O" : "X";
+        // 승부 판단하기
+        const hasWinner = checkWinner(e.target);
+        // 승자가 있으면
+        if (hasWinner) {
+          $result.textContent = `${turn}님의 승리!`;
+          $table.removeEventListener("click", callback);
+          return;
+        }
+        // 무승부 검사
+        // let draw = true; // 처음은 무승부 = true 로 놓고,
+        // rows.forEach((row) => {
+        //   row.forEach((cell) => {
+        //     if (!cell.textContent) {
+        //       //한 칸이라도 비어있으면 무승부 아님! false 로 바꿔줌
+        //       draw = false;
+        //     }
+        //   });
+        // }); // 이것을 한줄로 줄여주기
+        // 승자가 없으면
+        const draw = rows.flat().every((cell) => cell.textContent);
+        if (draw) {
+          $result.textContent = `무승부`;
+          return;
+        }
+
+        if (turn === "O") {
+          turn = "X";
+        } else if (turn === "X") {
+          turn = "O";
+        }
+      };
+      
+      for (let i = 0; i < 3; i++) {
+        const $tr = document.createElement("tr");
+        const cells = [];
+
+        for (let j = 0; j < 3; j++) {
+          const $td = document.createElement("td");
+          cells.push($td);
+          // $td.addEventListener("click", callback); // 이것이 3 * 3으로 9번 이벤트가 추가된다.그래서 버블링을 이용한다.
+          $tr.appendChild($td);
+        }
+        rows.push(cells);
+        $table.appendChild($tr);
+      }
+      $table.addEventListener("click", callback); // 이중 for문 안에 있는 이벤트 리스너를 여기서 한번만 써줘도 이벤트 위임때문에 이벤트가 일어난다.
+      // table, tr, td 순으로 태그가 들어있는데, td나 tr을 클릭했을시에도, 이벤트가 일어난다.
+      // 처음에는 td에 click 이벤트리스너를 달아주는줄 알았는데 아니었음!
+      document.body.append($table);
+      document.body.append($result);
+
+    </script>
+  </body>
+</html>
