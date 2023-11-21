@@ -97,3 +97,24 @@ td의 textContent 가 모두다 존재해야 true 가 된다.
 
 some 은 every 랑 반대.
 every는 모든게 참이어야 true, some 은 하나라도 참이면 true
+
+### parentNode, children
+- 부모 요소를 찾을때: parentNode
+- 자식 요소를 찾을때: children
+예를 들어, tr 안에 td가 3개가 있다고 하면,
+document.querySelector("tr").children; 하면 // 
+// HTMLCollection(3) [li, li, li] 이런식으로 나온다.
+열어보면,
+ 0: li
+  1: li
+  2: li
+  length: 3
+  __proto__: HTMLCollection
+  이런 형태이다.
+이것은 유사배열이다.(배열모양의 객체.)
+이것에 Array.from(유사배열객체) 하면 배열로 변환된다.
+
+### td, tr
+tr.rowIndex (몇번째 줄인지)
+td.cellIndex (몇번째 칸인지) 알려주는 기능
+
