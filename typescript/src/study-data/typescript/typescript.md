@@ -558,3 +558,344 @@ const coloredRectangle: ColoredShape = {
     height: 50,
 };
 ```
+
+## 5. 제너릭(Generic)
+
+### 제너릭을 사용하는 이유(any와 비교):
+
+타입이 여러가지 들어가고, 매개변수에 인자가 들어올때마다 타입을 추가해야하는 경우, 제너릭을 써준다. 함수나 클래스를 작성할때, 특정 타입을 미리 지정하지 않고, 사용할때 동적으로 타입을 결정할 수 있으므로, 유연성을 높이며, 재사용성, 확장성을 높여준다.
+
+제너릭이 any와 다른점: any는 모든 타입을 허용하므로 타입 안정성이 보장되지 않는다. 
+
+제너릭은 컴파일러가 코드를 더 안전하게 분석할 수 있다. any 는 어떤 타입이든 받을 수 있다는 점에서 제너릭과 비슷하지만, 실제로 함수가 반환할때 어떤 타입인지에 대한 정보는 잃게된다.
+
+### 기본 제너릭 타입 정의(function, interface, type, class)
+
+1. function
+
+```tsx
+function identity<T>(arg: T): T {
+  return arg;
+}
+
+let result: number = identity<number>(42);
+console.log(result); // 출력: 42
+
+let text: string = identity<string>("Hello, World!");
+console.log(text); // 출력: Hello, World!
+
+//let text = identity("Hello, World!"); // 이렇게 타입을 명시를 안해도 타입 추론이 가능합니다.
+// 코드를 간결하고 가독성 있게 하는데 있어 유용하지만, 명시적으로 타입을 전달하는것이 더 복잡한 예제에서는 더 좋습니다.
+```
+
+1. interface
+
+```tsx
+interface Box<T> {
+  value: T;
+}
+
+let box: Box<string> = { value: "Hello" };
+```
+
+1. type
+
+```tsx
+type Pair<T, U> = {
+  first: T;
+  second: U;
+};
+
+let pair: Pair<number, string> = { first: 42, second: "Hello" };
+```
+
+1. class
+
+```tsx
+class Wrapper<T> {
+  value: T;
+
+  constructor(value: T) {
+    this.value = value;
+  }
+
+  getValue(): T {
+    return this.value;
+  }
+}
+
+let numberWrapper = new Wrapper<number>(42);
+let stringValue = numberWrapper.getValue(); // stringValue의 타입은 number
+```
+
+### 제너릭 제약조건, 타입매개변수 사용
+
+- 제약조건: 특정한 타입으로 제한하고 싶을때 제너릭 제약조건을 사용한다.
+
+```tsx
+function loggingIdentity<T>(arg: T): T {
+  console.log(arg.length);// Error: Property 'length' does not exist on type 'T'.
+  return arg;
+}
+```
+
+ T(arg)의 타입이 정의되지 않았기 때문에, arg.length 에서 에러발생. length에 타입을준다.
+
+```tsx
+interface Lengthwise {
+  length: number;
+}
+
+function loggingIdentity<T extends Lengthwise>(arg: T): T {
+  console.log(arg.length);
+  return arg;
+}
+
+loggingIdentity(3); //에러 발생: Argument of type 'number' is not assignable to parameter of type 'Lengthwise'.
+loggingIdentity({ length: 10, value: 3 });
+//제약조건에 의해 제한되어 있기 때문에 모든 타입에 대해서는 동작하지 않는다.
+```
+
+- 제너릭 제약조건에서 타입 매개변수 사용: 이 예에서는 실수로 obj 에 존재하지 않는 프로퍼티를 가져오지 않도록 하기 위해 두가지 타입에 제약조건을 두었다.
+
+```tsx
+function getProperty<Type, Key extends keyof Type>(obj: Type, key: Key) {
+  return obj[key];
+}
+ 
+let x = { a: 1, b: 2, c: 3, d: 4 };
+ 
+getProperty(x, "a");
+getProperty(x, "m"); //obj에 존재하지 않는 프로퍼티를 가져와서 에러가 뜬다.
+```
+
+이 코드는 제약조건이 명시되지 않았으므로, T, U 는 어떤 타입이든 올 수 있다.
+
+### 제너릭 유틸리티 타입
+
+1. **Partial<T>**
+
+**`Partial<T>`**는 타입 **`T`**의 모든 속성을 선택적으로 만들어주는 타입입니다.(Required의 반대)
+
+```tsx
+interface User {
+  name: string;
+  age: number;
+}
+
+const partialUser: Partial<User> = {
+  name: "John",
+};
+
+// partialUser는 { name?: string; age?: number; } 타입
+```
+
+1. **Readonly<T>**
+
+**`Readonly<T>`**는 타입 **`T`**의 모든 속성을 읽기 전용으로 만들어주는 타입입니다.
+
+```tsx
+interface User {
+  name: string;
+  age: number;
+}
+
+const readonlyUser: Readonly<User> = {
+  name: "John",
+  age: 25,
+};
+
+readonlyUser.name = "rumi"; //Cannot assign to 'name' because it is a read-only property. 이라는 에러발생. 프로퍼티가 재할당 될 수 없다.
+// readonlyUser는 { readonly name: string; readonly age: number; } 타입
+```
+
+1. **Record<K, T>**
+
+**`Record<K, T>`**는 키 **`K`**와 값 **`T`**를 가진 객체의 타입을 나타냅니다.
+
+```tsx
+const record: Record<string, number> = {
+  age: 25,
+  score: 100,
+};
+
+// record는 { [key: string]: number; } 타입
+```
+
+**4. Pick<T, K>**
+
+**`Pick<T, K>`**는 타입 **`T`**에서 일부 속성만 선택하여 새로운 타입을 만듭니다.
+
+```tsx
+typescriptCopy code
+interface User {
+  name: string;
+  age: number;
+  address: string;
+}
+
+const pickedUser: Pick<User, "name" | "age"> = {
+  name: "John",
+  age: 25,
+};
+
+// pickedUser는 { name: string; age: number; } 타입
+```
+
+**5. Omit<T, K> (omit: 생략하다)**
+
+**`Omit<T, K>`**는 타입 **`T`**에서 일부 속성을 제외한 새로운 타입을 만듭니다.
+
+```tsx
+typescriptCopy code
+interface User {
+  name: string;
+  age: number;
+  address: string;
+}
+
+const omittedUser: Omit<User, "address"> = {
+  name: "John",
+  age: 25,
+};
+
+// omittedUser는 { name: string; age: number; } 타입
+
+```
+
+**6. Exclude<T, U>**
+
+**`Exclude<T, U>`**는 타입 **`T`**에서 **`U`**에 할당 가능한 타입을 제외한 새로운 타입을 만듭니다.
+
+```tsx
+// U를 제외한 T
+type T0 = Exclude<"a" | "b" | "c", "a">;
+//type T0 = "b" | "c"
+
+type T1 = Exclude<"a" | "b" | "c", "a" | "b">;
+//type T1 = "c"
+
+type T2 = Exclude<string | number | (() => void), Function>;     
+//type T2 = string | number
+```
+
+**7. Extract<T, U>**
+
+**`Extract<T, U>`**는 타입 **`T`**에서 **`U`**에 할당 가능한 타입만을 추출하여 새로운 타입을 만듭니다.
+
+```tsx
+type T0 = Extract<"a" | "b" | "c", "a" | "f">;
+//type T0 = "a" // "a", "f" 를 선택했지만, T에 있는 유니온 멤버만 가능하기 떄문에 "a"만 남는다
+
+**type T1 = Extract<string | number | (() => void), Function>;     
+//type T1 = () => void
+```
+
+**8. NonNullable<T>**
+
+**`NonNullable<T>`**는 **`T`**에서 **`null`**과 **`undefined`**를 제외한 새로운 타입을 만듭니다.
+
+```tsx
+type T0 = NonNullable<string | number | undefined>;     
+//type T0 = string | number
+
+type T1 = NonNullable<string[] | null | undefined>;
+//type T1 = string[]
+```
+
+**9. Parameters<T>**
+
+**`Parameters<T>`**는 함수 타입 **`T`**의 매개변수 타입들을 튜플로 만듭니다.
+
+```tsx
+type MyFunction = (a: number, b: string) => void;
+type MyFunctionParams = Parameters<MyFunction>; // 결과: [number, string]
+
+const myFunc: (...args: MyFunctionParams) => void = (a, b) => {
+  console.log(`a: ${a}, b: ${b}`);
+  // 함수 내용
+};
+
+// 함수 호출
+const params: MyFunctionParams = [42, 'Hello'];
+myFunc(...params);
+```
+
+**10. ConstructorParameters<T>**
+
+**`ConstructorParameters<T>`**는 클래스 생성자 함수 타입 **`T`**의 매개변수 타입들을 튜플로 만듭니다.
+
+```tsx
+class MyClass {
+  constructor(public x: number, public y: string) {}
+}
+
+type MyClassConstructorParams = ConstructorParameters<typeof MyClass>; // 결과: [number, string]
+```
+
+**11. ReturnType<T>**
+
+**`ReturnType<T>`**는 함수 타입 **`T`**의 반환 타입을 추출합니다.
+
+```tsx
+type MyFunction = () => number;
+type MyFunctionReturnType = ReturnType<MyFunction>; // 결과: number
+```
+
+**12. InstanceType<T>**
+
+**`InstanceType<T>`**는 클래스 타입 **`T`**의 인스턴스 타입을 추출합니다.
+
+```tsx
+class MyClass {
+  constructor(public x: number, public y: string) {}
+}
+
+type MyClassInstance = InstanceType<typeof MyClass>; // 결과: MyClass
+```
+
+**13. Required<T>**
+
+**`Required<T>`**는 타입 **`T`**의 모든 속성을 필수로 만듭니다.
+
+```tsx
+interface Options {
+  a?: number;
+  b?: string;
+}
+
+type RequiredOptions = Required<Options>; // 결과: { a: number, b: string }
+```
+
+**14. ThisParameterType**
+
+**`ThisParameterType`**은 함수 타입에서 **`this`** 매개변수의 타입을 추출합니다.
+
+```tsx
+type MyFunction = (this: { x: number }) => void;
+type ThisParamType = ThisParameterType<MyFunction>; // 결과: { x: number }
+```
+
+**15. OmitThisParameter**
+
+**`OmitThisParameter`**는 함수 타입에서 **`this`** 매개변수를 제외한 새로운 함수 타입을 만듭니다.
+
+```tsx
+type MyFunction = (this: { x: number }) => void;
+type NewFunctionType = OmitThisParameter<MyFunction>; // 결과: () => void
+```
+
+**16. ThisType<T>**
+
+**`ThisType<T>`**은 **`this`**의 타입을 **`T`**로 지정하여 해당 타입을 가지는 객체를 반환합니다.
+
+```tsx
+type MyObject = {
+  x: number;
+} & ThisType<{ y: string }>;
+
+const myObj: MyObject = {
+  x: 10,
+  y: 'Hello',
+};
+```
