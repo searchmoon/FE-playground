@@ -899,3 +899,195 @@ const myObj: MyObject = {
   y: 'Hello',
 };
 ```
+
+
+## 6. 연산자
+
+### 1. keyof, typeof 연산자
+
+- keyof : 객체 형태의 타입을, 따로 속성들만 뽑아 모아 유니온 타입으로 만들어주는 연산자
+
+```tsx
+type Person = {
+   firstName: string;
+   age: number;
+   isMarried: boolean;
+}
+
+type PersonKey = keyof Person;
+// type PersonKey = "firstName" | "age" | "isMarried"
+
+const key1: PersonKey = 'firstName';
+const key2: PersonKey = 'age';
+const key3: PersonKey = 'isMarried';
+```
+
+- typeof: 객체 데이터를 객체 타입으로 변환해주는 연산자
+
+```tsx
+const personInfo = {
+   firstName: 'John',
+   age: 30,
+   isMarried: true,
+};
+
+type PersonInfoType = typeof personInfo;
+/*
+type PersonInfoType = {
+    firstName: string;
+    age: number;
+    isMarried: boolean;
+}
+*/
+
+let myInfo: PersonInfoType = {
+   firstName: 'Alice',
+   age: 25,
+   isMarried: false,
+};
+```
+
+### 2. indexed access type(인덱스 접근 유형)
+
+인덱스 접근 유형을 사용하면 객체의 키를 사용하여 해당 키에 대한 값의 타입을 동적으로 가져올 수 있다.
+
+객체의 일부분에 대한 타입을 키를 사용하여 동적으로 가져와야 할 때 유용하게 사용된다.
+
+```tsx
+type Person = {
+  name: string;
+  age: number;
+  address: string;
+};
+type PersonValueType = Person['name']; // string
+
+type PersonKey = keyof Person; // "name" | "age" | "address"
+
+type PersonValues = Person[PersonKey]; // string | number | string
+```
+
+PersonValues 의 예처럼 유니온 타입을 사용하여 여러 속성에 대한 값의 타입을 한 번에 가져올 수 있다.
+
+### 3. 조건부 타입(Conditional Types)와 infer
+
+조건부 타입은 입력 타입에 따라 다른 타입을 반환할 수 있도록 하는 기능.
+
+> T extends U ? X : Y
+> 
+
+U 를 상속받은 T 의 타입의 true, false 값에 따라 타입이 결정된다.
+
+‘infer’ 키워드는 조건부 타입내에서 타입 추론을 허용한다.
+
+```tsx
+// 조건부 타입의 예
+// T가 객체이고 'name' 속성이 있다면 string, 그렇지 않으면 never
+type GetName<T> = T extends { name: string } ? string : number;
+
+const name1: GetName<{ name: string; age: number }> = 'John';
+const name2: GetName<{ age: number }> = 33;
+```
+
+이 두번째 예제에서는
+
+(infer U) 가 조건부 타입에서 사용되는 타입 추론을 위한 키워드이다. 
+
+따라서 T extends (infer U)[]는 "만약 T가 배열이라면, 그 배열의 원소 타입은 U로 추론한다"는 의미.
+
+```tsx
+type ElementType<T> = T extends (infer U)[] ? U : never;
+
+const numberArray: ElementType<number[]> = 42; // 타입은 number
+const stringArray: ElementType<string[]> = 'hello'; // 타입은 string
+```
+
+그렇다면 이 예제에서 never가 나오는 경우는 어떤 경우가 있을까?( 모름. 질문)
+
+### 4. Mapped 타입
+
+맵드 타입이란 기존에 정의되어 있는 타입을 새로운 타입으로 변환해 주는 문법을 의미한다. 자바스크립트 메서드인 map() 을 타입에 적용한 것과 같은 효과를 가진다.
+
+```tsx
+type Subset<T> = {
+  [K in keyof T]?: T[K];
+}
+```
+
+- [K in keyof T] 는 T 타입의 각 키 (K) 에 대해 순회한다.
+- T[K] : 각 키에 해당하는 속성을 옵셔널로 만든다. ( [K in keyof T]? 이 옵셔널이 붙어 있기 때문)
+
+```tsx
+interface Person {
+  age: number;
+  name: string;
+}
+
+const ageOnly: Subset<Person> = { age: 23 };
+const nameOnly: Subset<Person> = { name: 'Tony' };
+const ironman: Subset<Person> = { age: 23, name: 'Tony' };
+const empty: Subset<Person> = {};
+```
+
+이코드에서
+
+Person interface를 map 해준 Subset<Person>은 
+type Subset = {
+	age?: number;
+	name?: string;
+} 
+
+라는 타입을 만들기 때문에 위의 예처럼 속성들을 옵셔널로 사용할수 있다.
+
+코드에서 필요한 정보만을 사용하거나 전달할 때 특히 유용하다.
+
+(의문인점: interface를 그대로 갖다 쓰면 되는데 왜 이렇게 할까? 내 예시가 잘못됐기 때문이겠지?)
+
+### 5. 템플릿 리터럴
+
+: 타입스크립트의 string literal type을 기반으로 새로운 타입을 만드는 도구
+
+```tsx
+// 첫번째 예제
+type GreetingTemplate = `Hello, ${string}! You are ${number} years old.`;
+
+let greeting: GreetingTemplate;
+greeting = `Hello, John! You are 30 years old.`; // 타입스크립트는 정의된 구조를 따라야 함
+```
+
+greeting = `Hello, John! You are 삼십 years old.`;
+
+이렇게 {number}가 들어가야 할 부분에 string 타입을 넣으면 에러가 뜬다.
+
+```tsx
+type FirstName = "John";
+type LastName = "Doe" | 'Kim';
+
+type FullName = `${FirstName} ${LastName}`;
+
+let fullName: FullName;
+fullName = "John Doe";
+fullName = "John Kim"; // 타입스크립트는 정의된 구조를 따라야 함
+```
+
+### 6. **Non-null 단언 연산자 (!)**
+
+Non-null 단언 연산자는 변수가 null 이나 undefined 가 아님을 단언하는 용도로 사용된다. 변수 뒤에 ‘ ! ’ 기호를 붙여서 표현.
+
+```tsx
+const toUpperCase = (givenStr: string | null) => {
+    return givenStr!.toUpperCase()
+}
+```
+
+givenStr 에 ! 를 붙여 non-null 단언 연산자를 만들어주었는데, givenStr이 정말 string만 들어온다는 확신을 할 수 없다면 이렇게 사용하면 안된다. 그렇지 않으면 런타임 에러가 발생할 수 있다.
+
+대안으로는
+
+```tsx
+const toUpperCase = (givenStr: string | null) => {
+  if (givenStr === null) return null;
+  return givenStr.toUpperCase();
+};
+```
+
+이렇게 null 일 경우에 대비한 코드를 추가해주면 type 에러가 나지 않는다.
