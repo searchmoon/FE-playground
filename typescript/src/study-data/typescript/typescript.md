@@ -1091,3 +1091,147 @@ const toUpperCase = (givenStr: string | null) => {
 ```
 
 이렇게 null 일 경우에 대비한 코드를 추가해주면 type 에러가 나지 않는다.
+
+
+## 7. 타입호환
+
+### 타입 호환성
+
+여기서 다루는 타입 호환성은 어떤 것이 다른 것에 할당될 수 있는지 판단하는 것을 말한다.
+
+```tsx
+// 타입의 호환성
+interface A {
+  x: number;
+}
+
+class B {
+  x: number;
+  y: number;
+}
+
+let a: A;
+a = new B();
+```
+
+### 구조적 타이핑, 덕 타이핑
+
+- 구조적 타이핑:
+구조적 타이핑은 변수의 구조(속성 및 메서드)가 타입을 결정한다는 개념. 두 객체가 같은 속성과 메서드를 가지면 그 객체들은 같은 타입으로 간주된다.
+
+```tsx
+// 구조적 타이핑
+interface Avengers {
+  name: string;
+}
+
+let hero: Avengers;
+// 타입스크립트가 추론한 타입은 { name: string; location: string; } 
+let capt = { name: "Captain", location: "Pangyo" };
+hero = capt;
+```
+
+- 덕 타이핑:
+덕 타이핑에서는 객체가 어떤 타입에 속하는지가 아니라, 해당 객체가 필요한 메서드나 속성을 가지고 있는지에 따라 타입이 결정된다.
+
+```tsx
+// 덕 타이핑
+class Dog {
+  bark() {
+    console.log('Woof!');
+  }
+}
+
+class Duck {
+  quack() {
+    console.log('Quack!');
+  }
+}
+
+function introduce(animal: Dog | Duck) {
+  // animal이 Dog 타입이든 Duck 타입이든 상관없이 동작
+  if ('bark' in animal) {
+    animal.bark(); // Dog의 bark 메서드 호출
+  } else if ('quack' in animal) {
+    animal.quack(); // Duck의 quack 메서드 호출
+  }
+}
+
+introduce(new Dog()); // 출력: Woof!
+introduce(new Duck()); // 출력: Quack!
+```
+
+## 8. ts-pattern 활용
+
+### 선언적 프로그래밍 vs 명령형 프로그래밍
+
+명령형 프로그래밍은 어떻게(HOW) 할 것인가에 가깝다. 알고리즘을 명시하지만, 목표는 명시하지 않는다. 컴퓨터가 수행할 명령들을 순서대로 나열
+
+```tsx
+//명령형
+function double (arr) {
+    let result = [];
+    for (let i=0; i<arr.length; i++) {
+        result.push(arr[i] * 2)
+    }
+    return (result);
+}
+```
+
+선언적 프로그래밍은 무엇을(WHAT) 할 것인가와 가깝다. 제어 흐름을 설명하지 않고 계산 논리에 집중하는 프로그래밍 패러다임이다. 결과만 기술할뿐 어떻게는 기술하지 않는 프로그래밍 방법. (의도에 집중)
+
+```tsx
+//선언형
+function double (arr) {
+    return (arr.map(x => x * 2));
+}
+```
+
+### 라이브러리 도입전 검토(용량, 사용에 미치는 영향)
+
+- 용량이 그리 크지는 않지만, 프로젝트에 이미 많은 의존성이 있다면 번들 사이즈가 커질 수 있다.
+- if문과 switch문은 자바스크립트 기본 문법이기에 어느 환경에서나 돌아갈 수 있으나, ts-pattern은 ts-pattern이 없는 환경에서는 돌아갈 수 없다. 외부 종속성이 내 코드와 결합될 가능성이 높아짐. 또한 if문과 같은 분기처리 코드는 정말 많이 모든 곳에서 사용되기 때문에 이런 분기처리 코드들에 대한 처리를 외부 종속성에 위임한다는 것이 부담될 수 있다.
+
+### ts-pattern 장단점
+
+- 장점
+    - 더 간결하고 읽기 쉬운 코드를 작성할 수 있다.
+    - 타입 안정성을 제공하여 패턴 매칭의 누락된 경우를 컴파일 타임에 감지할 수 있다.
+    - 복잡한 패턴 매칭을 처리하기에 유용하다.
+- 단점
+    - 추가적인 라이브러리로 의존성을 추가해야 한다.
+    - 프로젝트에 이미 많은 의존성이 있다면 번들 사이즈가 커질 수 있다.
+    - 조건문에 비해 러닝커브가 좀 더 높을 수 있다.
+
+간단한 패턴을 처리한다면 switch, if문 사용. 복잡한 패턴을 다루거나 타입 안정성을 높이고자 한다면 ts-pattern.
+
+### ts-pattern 의 패턴매칭
+
+- 패턴매칭: 특정 패턴에 맞는 데이터를 찾거나 추출하는 기능. 함수형 프로그래밍의 핵심 개념 중 하나로, 코드의 가독성과 유지보수성을 향상시키는 데 도움을 줌. ****패턴 매칭과 조건문은 목적과 사용 방식에서 차이가 있지만, 두 가지 모두 프로그램의 제어 흐름을 분기시키는 데 사용되는 기능
+
+```tsx
+import { match, _ } from 'ts-pattern';
+
+// 간단한 유저 타입
+type User = { id: number; name: string; role: 'admin' | 'user' };
+
+// 패턴 매칭을 사용한 함수
+function getUserInfo(user: User) {
+  return match(user)
+    .with({ role: 'admin' }, () => 'Admin user')
+    .with({ role: 'user', name: 'John' }, () => 'Regular user named John')
+    .with({ role: 'user' }, () => 'Regular user')
+    .exhaustive(); // 패턴이 모두 다뤄졌는지 확인
+}
+
+// 사용 예시
+const adminUser: User = { id: 1, name: 'Admin', role: 'admin' };
+const regularUser: User = { id: 2, name: 'John', role: 'user' };
+
+console.log(getUserInfo(adminUser));    // 출력: 'Admin user'
+console.log(getUserInfo(regularUser));  // 출력: 'Regular user named John'
+```
+
+이 예제에서 match 함수를 사용하여 user 객체를 여러 패턴과 비교하고, 해당하는 패턴에 따라 다른 결과를 반환한다. with 메서드는 패턴을 정의하고, _는 와일드카드 패턴으로 모든 값과 일치한다. exhaustive()는 모든 패턴이 다뤄졌는지 확인한다.
+
+이러한 패턴 매칭은 코드를 더 읽기 쉽게 만들고, 다양한 경우에 대한 처리 로직을 명확하게 표현할 수 있게 도와준다.
