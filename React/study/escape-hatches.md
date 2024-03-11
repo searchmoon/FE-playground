@@ -420,3 +420,219 @@ DOM 노드를 직접 바꾸려고 하면 충돌로 이어지기 때문에 직접
 - 많은 경우 ref는 포커싱, 스크롤링, DOM 요소 크기 혹은 위치 측정할때 사용할 수 있다.
 - 컴포넌트는 기본적으로 DOM 노드를 노출하지 않는다. forwardRef와 두 번째 ref 인자를 특정 노드에 전달하는 것으로 선택적으로 노출할  수 있다.  예시 참고
 - React가 관리하는 DOM 노드를 직접 바꾸려 하지 말기. 수정하려 한다면, React가 변경할 이유가 없는 부분만 수정하자.
+
+# Effect로 동기화하기
+
+**Effect**는 렌더링 자체에 의해 발생하는 부수 효과를 특정하는 것. 특정 이벤트가 아닌 렌더링에 의해 직접 발생한다. 
+
+### Effect 적절한 곳에 쓰기
+
+컴포넌트에 Effect 를 무작정 추가하면 안된다. 주로 react 코드를 벗어난 특정 외부시스템과 동기화 하기 위해 사용된다. 브라우저 API, 써드파티 위젯, 네트워크 등을 포함한다.  단순히 다른 상태에 기반하여 일부 상태를 조정하는 경우에는 Effect 가 필요하지 않을 수 있다.
+
+### Effect 작성하는 법
+
+```jsx
+useEffect(() => {
+	// 로직. 만약 이 코드가 count에 의존한다면 아래처럼 의존성(dependencies) 배열에 count 추가
+	// 이곳의 코드는 모든 렌더링 후에 실행
+}, [count])
+```
+
+- 기본적으로 Effect 는 모든 렌더링 후에 실행된다.
+- 대부분의 Effect 는 모든 렌더링 후가 아닌 필요할때만 다시 실행되어야한다. 의존성을 지정하여 이걸 제어할 수 있다.
+- 일부 Effect 는 수행중이던 작업을 중지, 취소등을 해야할수도 있다. cleanup 함수 를 반환하여서 그런 동작들이 가능하다.
+
+컴포넌트가 렌더링 될 때마다 React는 화면을 업데이트한 이후에 useEffect 내부의 코드를 실행합니다. 다시 말해, useEffect는 화면에 렌더링이 반영될 때까지 코드 실행을 지연 시킨다.
+
+Effect는 일반적으로 컴포넌트를 *외부* 시스템과 동기화하는 데 사용된다. 외부 시스템이 없고 다른 상태에 기반하여 상태를 조정하려는 경우에는 Effect가 필요하지 않을 수 있다는것을 기억해라.
+
+### 1단계: Effect 선언하기
+
+### **2단계: Effect의 의존성 지정하기**
+
+```jsx
+import { useState, useRef, useEffect } from 'react';
+
+function VideoPlayer({ src, isPlaying }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (isPlaying) {
+      console.log('video.play() 호출');
+      ref.current.play();
+    } else {
+      console.log('video.pause() 호출');
+      ref.current.pause();
+    }
+  }, [isPlaying]);
+
+  return <video ref={ref} src={src} loop playsInline />;
+}
+
+export default function App() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [text, setText] = useState('');
+  return (
+    <>
+      <input value={text} onChange={e => setText(e.target.value)} />
+      <button onClick={() => setIsPlaying(!isPlaying)}>
+        {isPlaying ? '일시 정지' : '재생'}
+      </button>
+      <VideoPlayer
+        isPlaying={isPlaying}
+        src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+      />
+    </>
+  );
+}
+```
+
+위의 예시 코드에서 useEffect 가 감싸고 있는 내부의 코드를 살펴보면, 
+ref.current.play(), ref.current.pause() 등을 사용하고 있고, useEffect 를 사용해주지 않으면, 렌더링중에 호출하려고 시도할 수 있다. 그래서 useEffect 로 감싸줘야 하고, isPlaying을 의존성 배열에 추가해야한다. 그렇지 않으면 lint 에러가 발생한다. 
+저 예시에서 의존성 배열로 [isPlaying]을 지정하면 React에게 이전 렌더링 중에 isPlaying이 이전과 동일하다면 Effect를 다시 실행하지 않도록 해야 한다고 알려준다. 이 변경으로 입력란에 입력을 입력하면 Effect가 다시 실행되지 않고, 재생/일시 정지 버튼을 누르면 Effect가 실행된다.
+
+```jsx
+const [count, setCount] = useState(0);
+useEffect(() => {
+  setCount(count + 1);
+});
+```
+
+이런 코드는 무한루프를 만들어낸다. useEffect 실행, state 변경, useEffect 실행, state 변경….
+
+### 왜 ref는 의존성 배열에서 생략해도 될까?
+
+```jsx
+function VideoPlayer({ src, isPlaying }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (isPlaying) {
+      ref.current.play();
+    } else {
+      ref.current.pause();
+    }
+  }, [isPlaying]);
+```
+
+이 코드에서 보면 ref 는 의존성 배열에 들어가 있지않다.
+
+이유는 ref 객체는 stable identity 를 가지기 때문. react는 동일한 useRef 호출에서 항상 같은 객체를 얻을 수 있음을 보장한다. 이 객체는 절대 변경되지 않기 때문에 자체적으로 Effect 를 다시 실행시키지않는다. useState로 반환되는 set 함수들도 의존성에서 생략되는 것을 볼 수 있다.
+
+### 3단계: 필요하다면 클린업을 추가하기
+
+```jsx
+import { useEffect } from 'react';
+import { createConnection } from './chat.js';
+
+export default function ChatRoom() {
+  useEffect(() => {
+    const connection = createConnection();
+    connection.connect();
+    return () => {
+      connection.disconnect();
+    };
+  }, []);
+  return <h1>채팅에 오신걸 환영합니다!</h1>;
+}
+
+export function createConnection() {
+  // 실제 구현은 정말로 채팅 서버에 연결하는 것이 되어야 합니다.
+  return {
+    connect() {
+      console.log('연결 중...');
+    },
+    disconnect() {
+      console.log('연결이 끊겼습니다.');
+    }
+  };
+}
+```
+
+이렇게 밑줄그은 부분을 추가해주었다. 클린업 함수.
+
+connect가 실행이 되고, 컴포넌트를 이동을 했을때 컴포넌트가 언마운트 되었을때에도 연결중…. 이후에 끊는 동작을 하지 않고, 다른 페이지를 왔다가 돌아온다면, 연결중…. 이 하나가 더 출력된다. 그런 문제가 발생하기 때문에 disconnect 로 클린업 함수를 추가해주는것이다.
+
+### 개발 중에 Effect가 두번 실행되는 경우를 다루는 방법
+
+: 클린업 함수를 구현하는것
+
+클린업 함수는 Effect 가 수행하던 작업을 중단하거나 되돌리는 역할을 한다.
+
+```jsx
+// 1번 예제
+useEffect(() => {
+  console.log('useEffect executed');
+
+  const timerId = setInterval(() => {
+    setCount(prevCount => prevCount + 1);
+  }, 1000);
+
+  return () => {
+    console.log('Cleanup function executed');
+    clearInterval(timerId); // 타이머 제거
+  };
+}, []);
+```
+
+이런식으로 타이머를 제거하거나 이전에 설정한 이벤트 리스너등을 제거하는 등의 작업을 수행한다.
+
+```jsx
+// 2번 예제
+useEffect(() => {
+  console.log('API call initiated');
+
+  const source = axios.CancelToken.source(); // 취소 토큰 생성
+
+  axios.get('https://api.example.com/data', {
+    cancelToken: source.token // 요청에 취소 토큰 추가
+  })
+  .then(response => {
+    console.log('API call completed');
+    setData(response.data);
+  })
+  .catch(error => {
+    console.error('API call failed:', error.message);
+  });
+
+  // 클린업 함수: 컴포넌트가 언마운트되거나 업데이트될 때 실행됨
+  return () => {
+    console.log('Cleanup function executed');
+    source.cancel('API call cancelled'); // API 요청 취소
+  };
+}, []); // 의존성 배열이 빈 배열이므로 컴포넌트가 마운트될 때 한 번만 실행됨
+```
+
+클린업 함수를 사용해서 메모리 누수를 방지하고 불필요한 리소스 사용을 최소화 할 수 있다.
+
+### **Effect에서 데이터를 가져오는 좋은 대안**
+
+useEffect 에서 fetch 호출을 작성하는것은 매우 수동적인 접근 방식이며 중요한 단점이 있다. 
+
+- Effect 안에서 직접 가져오는것은 일반적으로 데이터를 미리 로드하거나 캐시하지 않음을 의미하므로 컴포넌트가 언마운트되고 다시 마운트가 되면 데이터를 다시 가져와야한다.
+- 초기 서버 렌더링 시에 데이터가 없는 로딩 상태가 발생한다.
+- 네트워크 폭포가 발생할 수 있어 성능이 저하될 수 있다.
+
+대안:
+
+- useEffect 안에서 데이터를 가져온 후에 useState를 사용하여 가져온 데이터를 저장하고, 저장된 데이터를 사용하여 컴포넌트를 렌더링하는 방식을 사용할 수 있다. 이 방식은 데이터를 캐시하여 컴포넌트가 다시 마운트될 때마다 데이터를 다시 가져오는 것을 방지할 수 있다.
+- 상태관리 라이브러리로 데이터를 관리하는 방식 사용하기. 데이터의 상태를 전역적으로 관리할 수 있어 여러 컴포넌트에서 데이터 공유를 쉽게 할 수 있다.
+- useQuery 를 사용하여 데이터 패칭을 효율적으로 하고, 데이터 캐싱, 로딩상태 관리(isLoading), 에러처리(isError, error), 마운트 이후에 데이터 가져오기 등을 통해 데이터 관리를 효율적으로 할 수 있다.
+
+useQuery 나 useEffect 를 사용하지 않고도 데이터를 캐싱하는 방법:
+
+- 커스텀 훅을 활용한 데이터 캐싱: 커스텀 훅을 사용하여 데이터를 가져올 수 있다.
+- Context API 를 활용한 전역 상태관리
+- 상태관리 라이브러리를 사용한 데이터관리
+- 로컬스토리지, 세션 스토리지를 활용한 데이터 저장
+
+### 요약
+
+- 이벤트와 달리 Effect는 특정 상호작용이 아닌 렌더링 자체에 의해 발생
+- Effect를 사용하면 컴포넌트를 외부 시스템(타사 API, 네트워크 등)과 동기화할 수 있다.
+- 기본적으로 Effect는 모든 렌더링(초기 렌더링 포함) 후에 실행
+- React는 모든 의존성이 마지막 렌더링과 동일한 값을 가지면 Effect를 건너뜁니다.
+- 의존성을 “선택”하는것이 아님. 의존성은 Effect 내부의 코드에 의해 결정된다.(리액트가 기대하는 것과 일치하지 않으면 린트에러 발생)
+- 빈 의존성 배열([])은 컴포넌트 “마운팅”(화면에 추가됨)을 의미한다. 마운트 될때만 실행(컴포넌트가 나타날 때)
+- Strict Mode에서 React는 컴포넌트를 두 번 마운트한다.(개발 환경에서만!) 이는 Effect의 스트레스 테스트를 위한 것
+- Effect가 다시 마운트로 인해 중단된 경우 클린업 함수를 구현해야 한다.
+- React는 Effect가 다음에 실행되기 전에 정리 함수를 호출하며, 언마운트 중에도 호출한다.
