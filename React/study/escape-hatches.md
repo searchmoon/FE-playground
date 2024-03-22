@@ -636,3 +636,408 @@ useQuery 나 useEffect 를 사용하지 않고도 데이터를 캐싱하는 방�
 - Strict Mode에서 React는 컴포넌트를 두 번 마운트한다.(개발 환경에서만!) 이는 Effect의 스트레스 테스트를 위한 것
 - Effect가 다시 마운트로 인해 중단된 경우 클린업 함수를 구현해야 한다.
 - React는 Effect가 다음에 실행되기 전에 정리 함수를 호출하며, 언마운트 중에도 호출한다.
+
+
+# **Effect 의존성 제거하기**
+
+state나 props가 useEffect 에서 사용된다면 의존성을 넣어줘야한다.
+
+```jsx
+
+function ChatRoom({ roomId }) { // This is a reactive value
+  useEffect(() => {
+    const connection = createConnection(serverUrl, roomId); // This Effect reads that reactive value
+    connection.connect();
+    return () => connection.disconnect();
+  }, [roomId]); // ✅ So you must specify that reactive value as a dependency of your Effect
+  // ...
+}
+```
+
+이런 코드가 있다고 할때, 의존성을 제거하려면 해당 컴포넌트가 의존성이 될 필요가 없다는것을 린터에 증명해야한다.
+roomId 의존성을 제거하려면 저 roomId를 컴포넌트 밖으로 이동시켜서 반응형 값이 아니고, 재렌더링 시에도 변경되지 않음을 증명할 수 있다.
+
+의존성 목록은:  ‘effect 의 코드에서 사용하는 모든 반응형 값의 목록’ 이라고 할 수 있다.
+
+ // eslint-ignore-next-line react-hooks/exhaustive-deps
+
+이것은 린터를 제거(무시) 하는 코드인데, 이것은 쓰지 않는것이 좋다.
+
+### 불필요한 의존성 제거하기
+
+이 코드가 useEffect 가 필요한 코드인지 살펴보고, 이벤트 핸들러로 동작할 수 있는지 살펴봐야한다. 이런코드라면,
+
+```jsx
+function Form() {
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (submitted) {
+      // 🔴 Avoid: Event-specific logic inside an Effect
+      post('/api/register');
+      showNotification('Successfully registered!');
+    }
+  }, [submitted]);
+
+  function handleSubmit() {
+    setSubmitted(true);
+  }
+
+  // ...
+}
+```
+
+이렇게 바꿔준다.
+이것은 애초에 Effect 가 아니어야 했기 때문에. 특정 상호작용에 대한 응답으로 일부 코드를 실행하려면 해당 로직을 해당 이벤트 핸들러에 직접 넣어야한다.
+
+```jsx
+function Form() {
+  const theme = useContext(ThemeContext);
+
+  function handleSubmit() {
+    // ✅ Good: Event-specific logic is called from event handlers
+    post('/api/register');
+    showNotification('Successfully registered!', theme);
+  }  
+
+  // ...
+}
+```
+
+이렇게 바꿔주고 나면, 사용자가 폼을 제출할 때만 실행된다.
+
+### Effect 가 관련없는 여러가지 작업을 한곳에서 수행하지 않게 하기.
+
+이 코드 예시를 보면, country의 props에 따라 cities State를 네트워크와 동기화한다. city의 변경사항이 발생했을때 또 fetch 를 하니까 불필요하게 useEffect 가 다시 실행되어 fetch를 두번 하는 경우가 발생하기 때문에 이런 로직은 분리를 해주는 것이 좋다.
+
+```jsx
+function ShippingForm({ country }) {
+  const [cities, setCities] = useState(null);
+  const [city, setCity] = useState(null);
+  const [areas, setAreas] = useState(null);
+
+  useEffect(() => {
+    let ignore = false;
+    fetch(`/api/cities?country=${country}`)
+      .then(response => response.json())
+      .then(json => {
+        if (!ignore) {
+          setCities(json);
+        }
+      });
+    // 🔴 Avoid: A single Effect synchronizes two independent processes
+    if (city) {
+      fetch(`/api/areas?city=${city}`)
+        .then(response => response.json())
+        .then(json => {
+          if (!ignore) {
+            setAreas(json);
+          }
+        });
+    }
+    return () => {
+      ignore = true;
+    };
+  }, [country, city]); // ✅ All dependencies declared
+
+  // ...
+```
+
+이런식으로 로직을 useEffect 두개로 나눠준다.
+
+```jsx
+function ShippingForm({ country }) {
+  const [cities, setCities] = useState(null);
+  useEffect(() => {
+    let ignore = false;
+    fetch(`/api/cities?country=${country}`)
+      .then(response => response.json())
+      .then(json => {
+        if (!ignore) {
+          setCities(json);
+        }
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [country]); // ✅ All dependencies declared
+
+  const [city, setCity] = useState(null);
+  const [areas, setAreas] = useState(null);
+  useEffect(() => {
+    if (city) {
+      let ignore = false;
+      fetch(`/api/areas?city=${city}`)
+        .then(response => response.json())
+        .then(json => {
+          if (!ignore) {
+            setAreas(json);
+          }
+        });
+      return () => {
+        ignore = true;
+      };
+    }
+  }, [city]); // ✅ All dependencies declared
+
+  // ...
+```
+
+이렇게 나눠주면, 두 개의 개별 Effect에는 두 개의 개별 의존성 목록이 있으므로 의도치 않게 서로를 트리거하지 않는다.
+
+### 다음 State를 계산하기 위해 어떤 State를 읽고 있나요?
+
+이 예시는 새 메시지가 도착할 때마다 새로 생성된 배열로 messages State 변수를 업데이트한다.
+
+```jsx
+function ChatRoom({ roomId }) {
+  const [messages, setMessages] = useState([]);
+  useEffect(() => {
+    const connection = createConnection();
+    connection.connect();
+    connection.on('message', (receivedMessage) => {
+      setMessages([...messages, receivedMessage]);
+    });
+    return () => connection.disconnect();
+  }, [roomId, messages]); // ✅ All dependencies declared
+  // ...
+```
+
+위와 같이 messages는 effect 에서 읽는 반응형 값이므로 의존성에 넣어줘야한다.
+
+그렇게 하면 채팅의 메세지를 수신할때마다 messages 의 값이 바뀌는 것이기 때문에 재렌더링을 하도록 하기 때문에 useEffect 도 다시 동기화된다. 
+이 문제를 해결하려면 messages 를 의존성으로 추가하지 않는것인데 그렇게 하려면,
+ setMessages(msg ⇒ [...msg, receivedMessage]);
+이런식으로 업데이터 함수를 전달하면 된다. 의존성에 있던 messages를 빼주면된다.
+
+Effect에서 반응해서는 안되는 로직을 추출하려면 비반응 로직을 Effect 이벤트로 옮기면된다.
+
+그 기능은 → useEffectEvent. 곧 나올거란다.
+
+```jsx
+const onMessage = useEffectEvent(receivedMessage => {
+  onReceiveMessage(receivedMessage);
+});
+```
+
+receivedMessage가 의존성이기 때문에 부모가 재랜더링될때마다 effect가 다시 동기화된다. 그것을 해결하려면 useEffectEvent 로 감싸고, Effect의 로직에서 바깥으로 꺼내준다.
+
+### 일부 반응형 값이 의도치 않게 변경될때
+
+Effect가 특정 값에 ‘반응’하기를 원하지만, 그 값이 원하는 것보다 더 자주 변경되어 사용자의 관점에서 실제 변경 사항을 반영하지 못할 수도 있다. 예를 들어 컴포넌트 본문에 options 라는 객체를 생성한 다음 Effect 내부에서 해당 객체를 읽는다고 가정해 본다.
+
+```jsx
+function ChatRoom({ roomId }) {
+  // ...
+  const options = {
+    serverUrl: serverUrl,
+    roomId: roomId
+  };
+ useEffect(() => {
+    const connection = createConnection(options);
+    connection.connect();
+    return () => connection.disconnect();
+  }, [options]); // ✅ All dependencies declared
+  // ...
+```
+
+이 객체는 컴포넌트 본문에서 선언되므로 [반응형 값](https://ko.react.dev/learn/lifecycle-of-reactive-effects#effects-react-to-reactive-values)이다. 이런 경우에는 options을 의존성으로 넣어주게된다.
+
+이 아래 코드의에서의 동작을 보면, input의 message state 변수만 업데이트 해야한다. 그러나, message 를 업데이트 할때마다 컴포넌트가 재렌더링된다. 이런 의도치 않은 동작을 막기위해서는 저 options 객체를 컴포넌트의 바깥으로 빼주고, useEffect의 의존성에서 제거해주면된다. (1번을 2번 자리로 이동). 객체가 아닌 함수라도 똑같이 적용하면 된다.
+
+```jsx
+
+import { useState, useEffect } from 'react';
+import { createConnection } from './chat.js';
+
+const serverUrl = 'https://localhost:1234';
+
+//2번. options 여기로 이동
+function ChatRoom({ roomId }) {
+  const [message, setMessage] = useState('');
+
+  // Temporarily disable the linter to demonstrate the problem
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const options = {
+    serverUrl: serverUrl,
+    roomId: roomId
+  }; //1번. 여기서
+
+  useEffect(() => {
+    const connection = createConnection(options);
+    connection.connect();
+    return () => connection.disconnect();
+  }, [options]);
+
+  return (
+    <>
+      <h1>Welcome to the {roomId} room!</h1>
+      <input value={message} onChange={e => setMessage(e.target.value)} />
+    </>
+  );
+}
+
+export default function App() {
+  const [roomId, setRoomId] = useState('general');
+  return (
+    <>
+      <label>
+        Choose the chat room:{' '}
+        <select
+          value={roomId}
+          onChange={e => setRoomId(e.target.value)}
+        >
+          <option value="general">general</option>
+          <option value="travel">travel</option>
+          <option value="music">music</option>
+        </select>
+      </label>
+      <hr />
+      <ChatRoom roomId={roomId} />
+    </>
+  );
+}
+```
+
+### **Effect 내에서 동적 객체 및 함수 이동**
+
+이 아래의 예시에서는, options라는 객체가 roomId props처럼 재렌더링의 결과로 변경될 수 있는 반응형 값에 의존하는 경우, 컴포넌트 외부로 끌어낼 수 없다. 하지만 Effect의 코드 *내부*로 이동시킬 수는 있다.
+
+```jsx
+const serverUrl = 'https://localhost:1234';
+
+function ChatRoom({ roomId }) {
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const options = {
+      serverUrl: serverUrl,
+      roomId: roomId
+    };
+    const connection = createConnection(options);
+    connection.connect();
+    return () => connection.disconnect();
+  }, [roomId]); // ✅ All dependencies declared
+  // ...
+```
+
+options 객체가 effect 내부에서 선언되었으므로 더이상 effect의 의존성이 아니다. 대신 그 안의 roomId 는 의존성으로 넣어줘야한다. 외부에서 온 값이기때문에
+
+이 아래의 예시는 useEffect 안에서 로직을 그룹화 하기 위해 함수를 작성해준것인데,이렇게 해주면 의존성에 넣어주지 않아도 된다. Effect의 내부에서 선언한것이기 때문에.
+
+```jsx
+const serverUrl = 'https://localhost:1234';
+
+function ChatRoom({ roomId }) {
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    function createOptions() {
+      return {
+        serverUrl: serverUrl,
+        roomId: roomId
+      };
+    }
+
+    const options = createOptions();
+    const connection = createConnection(options);
+    connection.connect();
+    return () => connection.disconnect();
+  }, [roomId]); // ✅ All dependencies declared
+  // ...
+```
+
+### 객체에서 원시 값 읽기
+
+```jsx
+function ChatRoom({ options }) {
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const connection = createConnection(options);
+    connection.connect();
+    return () => connection.disconnect();
+  }, [options]); // ✅ All dependencies declared
+  // ...
+```
+
+```jsx
+<ChatRoom
+  roomId={roomId}
+  options={{
+    serverUrl: serverUrl,
+    roomId: roomId
+  }}
+/>
+```
+
+이 예시는 가끔 props에서 객체를 받을 수도 있을때, 렌더링 중에 부모 컴포넌트가 객체를 생성한다는 점이 위험하다.
+그래서 이 코드를 이렇게 바꿔주면 되는데, 
+
+```jsx
+function ChatRoom({ options }) {
+  const [message, setMessage] = useState('');
+
+  const { roomId, serverUrl } = options;
+  useEffect(() => {
+    const connection = createConnection({
+      roomId: roomId,
+      serverUrl: serverUrl
+    });
+    connection.connect();
+    return () => connection.disconnect();
+  }, [roomId, serverUrl]); // ✅ All dependencies declared
+  // ...
+```
+
+이렇게 객체에서 정보를 빼서, 의존성에 넣어주고 createConnection(options) 이렇게 객체 자체를 넣어주는것을 바꿔준다. 이렇게 하면 전 코드와 달리, 부모컴포넌트에 의해 의도치않게 객체가 다시 생성된 경우 채팅이 다시 연결되지 않는다.
+
+### 함수에서 원시값 계산
+
+함수에서도 위와 동일하게 해주면 된다.
+
+```jsx
+<ChatRoom
+  roomId={roomId}
+  getOptions={() => {
+    return {
+      serverUrl: serverUrl,
+      roomId: roomId
+    };
+  }}
+/>
+```
+
+이렇게 함수를 전달해주는 경우에도, 이 함수 자체를 useEffect에 넣어줘서 의존성에 포함시키지 않고,
+
+```jsx
+function ChatRoom({ getOptions }) {
+  const [message, setMessage] = useState('');
+
+  const { roomId, serverUrl } = getOptions();
+  useEffect(() => {
+    const connection = createConnection({
+      roomId: roomId,
+      serverUrl: serverUrl
+    });
+    connection.connect();
+    return () => connection.disconnect();
+  }, [roomId, serverUrl]); // ✅ All dependencies declared
+  // ...
+
+```
+
+이렇게 빼주면 된다.
+
+함수가 이벤트 핸들러이지만 변경 사항으로 인해 Effect가 다시 동기화되는 것을 원하지 않는 경우, useEffectEvent 로 감싸기( 아직 안나옴. 개발중)
+
+### 요약:
+
+- 의존성은 항상 코드와 일치해야한다.
+- 의존성이 마음에 들지 않다면 코드 수정하기.
+- 린터 제거하지 말기. 버그 발생 위험.
+- 의존성을 제거하려면 린터에게 증명해야함.
+- 특정 상호작용에 대한 응답으로 일부 코드가 실행되어야 하는 경우에는: 해당코드 이벤트핸들러로 이동하기.
+- 하나의 Effect는 관련없는 여러가지 작업을 수행하게 하지 말기.
+- 이전 State를 기반으로 일부 State를 업데이트하려면 업데이터 함수를 전달하기.
+- 객체와 함수 그자체의 의존성 피하기. 컴포넌트 외부나 Effect 내부로 이동하기.
