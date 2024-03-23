@@ -812,3 +812,310 @@ export function TasksProvider({ children }) {
 ```
 
 이렇게 하나의 Provider 로 해주면 깔끔해진다.
+
+# **커스텀 Hook으로 로직 재사용하기**
+
+중복 코드가 있을때, 커스텀 hook 으로 로직을 재사용할 수 있다.
+
+```jsx
+import { useState, useEffect } from 'react';
+
+export default function StatusBar() {
+  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    function handleOnline() {
+      setIsOnline(true);
+    }
+    function handleOffline() {
+      setIsOnline(false);
+    }
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return <h1>{isOnline ? '✅ 온라인' : '❌ 연결 안 됨'}</h1>;
+}
+
+```
+
+```jsx
+import { useState, useEffect } from 'react';
+
+export default function SaveButton() {
+  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    function handleOnline() {
+      setIsOnline(true);
+    }
+    function handleOffline() {
+      setIsOnline(false);
+    }
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  function handleSaveClick() {
+    console.log('✅ 진행사항 저장됨');
+  }
+
+  return (
+    <button disabled={!isOnline} onClick={handleSaveClick}>
+      {isOnline ? '진행사항 저장' : '재연결 중...'}
+    </button>
+  );
+}
+
+```
+
+이런경우에 중복 코드를 커스텀훅으로 만들어 중복을 제거할 수 있다. return 값으로 isOnline을 반환해준다.
+
+```jsx
+function useOnlineStatus() {
+  const [isOnline, setIsOnline] = useState(true);
+  useEffect(() => {
+    function handleOnline() {
+      setIsOnline(true);
+    }
+    function handleOffline() {
+      setIsOnline(false);
+    }
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+  return isOnline;
+}
+
+```
+
+```jsx
+function StatusBar() {
+  const isOnline = useOnlineStatus();
+  return <h1>{isOnline ? '✅ 온라인' : '❌ 연결 안 됨'}</h1>;
+}
+```
+
+이런식으로 코드가 간소화된다.
+
+### **Hook의 이름은 항상 use 로 시작해야 한다.**
+
+작명규칙:
+
+1. react 컴포넌트의 이름은 항상 대문자로 시작. 또한 무언가를 반환해야한다.(주로 jsx를 반환하는 것이 일반적)
+2. hook 의 이름은 use를 붙여주고 그 뒤에는 대문자로. (카멜케이스) hook들은 어떤 값이든 반환할 수 있다. 
+
+린터가 React에 맞춰있다면, 작명 규칙을 지켜야한다. 만약 useOnlineStatus를 getOnlineStatus로 바꿔보면, linter가 내부에서 useState나 useEffect를 사용하는 것을 더 이상 허용하지 않을것이다. 오로지 Hook과 컴포넌트만 다른 Hook을 사용할 수 있다.
+
+어떤 다른 hook 을 사용할때만 use 가 앞에 붙은 hook 을 만들어준다. 함수 내부에 다른 hook 이 사용되지 않는다면, 커스텀훅으로 만들 필요가 없고, 일반 함수로 만들면된다. 예를들면 useSorted 라는 이름은 getSorted 라는 일반함수로 만들기.
+
+적어도 하나의 hook 을 내부에서 사용한다면, 반드시 함수 앞에 use를 붙여줘야함. 이 자체로 hook이된다.
+
+### 커스텀 hook 은 state 그 자체를 공유하는게 아닌 state 저장 로직을 공유하는것이다.
+(독립적으로 작동이된다.)
+
+클래스로 인스턴스를 만든다고 생각하면 된다.
+const firstNameProps = useFormInput('Mary');
+const lastNameProps = useFormInput('Poppins');
+
+이런 로직을 커스텀훅으로 만들어 주어 사용할 수 있다. form 입력에 반복되는 로직이 있기 때문에. 
+
+```jsx
+import { useState } from 'react';
+
+export default function Form() {
+  const [firstName, setFirstName] = useState('Mary');
+  const [lastName, setLastName] = useState('Poppins');
+
+  function handleFirstNameChange(e) {
+    setFirstName(e.target.value);
+  }
+
+  function handleLastNameChange(e) {
+    setLastName(e.target.value);
+  }
+
+  return (
+    <>
+      <label>
+        First name:
+        <input value={firstName} onChange={handleFirstNameChange} />
+      </label>
+      <label>
+        Last name:
+        <input value={lastName} onChange={handleLastNameChange} />
+      </label>
+      <p><b>Good morning, {firstName} {lastName}.</b></p>
+    </>
+  );
+}
+
+```
+
+이렇게 useFormInput 을 생성해준다.
+
+```jsx
+// App.js
+import { useFormInput } from './useFormInput.js';
+
+export default function Form() {
+  const firstNameProps = useFormInput('Mary');
+  const lastNameProps = useFormInput('Poppins');
+
+  return (
+    <>
+      <label>
+        First name:
+        <input {...firstNameProps} />
+      </label>
+      <label>
+        Last name:
+        <input {...lastNameProps} />
+      </label>
+      <p><b>Good morning, {firstNameProps.value} {lastNameProps.value}.</b></p>
+    </>
+  );
+}
+```
+
+```jsx
+//useFormInput.js
+import { useState } from 'react';
+
+export function useFormInput(initialValue) {
+  const [value, setValue] = useState(initialValue);
+
+  function handleChange(e) {
+    setValue(e.target.value);
+  }
+
+  const inputProps = {
+    value: value,
+    onChange: handleChange
+  };
+
+  return inputProps;
+}
+```
+
+여기서 value라고 불리는 state 변수가 *한 번만* 정의된다는 것을 기억하기.
+
+이와 달리, Form 컴포넌트는 useFormInput을 **두 번** 호출한다.
+
+### **Hook 사이에 상호작용하는 값 전달하기**
+
+커스텀 Hook 안의 코드는 컴포넌트가 재렌더링될 때마다 다시 돌아갈 것이다. 이게 바로 커스컴 Hook이 순수해야하는 이유다.
+
+### 언제 custom hook을 사용해야 하는지
+
+모든 자잘한 중복되는 코드들까지 커스텀훅으로 분리할 필요는 없다.
+
+하지만 Effect를 사용하든 사용하지 않든, 커스텀 Hook 안에 그것을 감싸는 게 좋은지 아닌지 고려하기. Effect를 자주 쓸 필요가 없을지도 모른다. 
+
+아래의 코드는 두가지 목록을 보여주는  ShippingForm 컴포넌트이다.
+
+```jsx
+function ShippingForm({ country }) {
+  const [cities, setCities] = useState(null);
+  // 이 Effect는 나라별 도시를 불러옵니다.
+  useEffect(() => {
+    let ignore = false;
+    fetch(`/api/cities?country=${country}`)
+      .then(response => response.json())
+      .then(json => {
+        if (!ignore) {
+          setCities(json);
+        }
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [country]);
+
+  const [city, setCity] = useState(null);
+  const [areas, setAreas] = useState(null);
+  // 이 Effect 선택된 도시의 구역을 불러옵니다.
+  useEffect(() => {
+    if (city) {
+      let ignore = false;
+      fetch(`/api/areas?city=${city}`)
+        .then(response => response.json())
+        .then(json => {
+          if (!ignore) {
+            setAreas(json);
+          }
+        });
+      return () => {
+        ignore = true;
+      };
+    }
+  }, [city]);
+
+  // ...
+```
+
+이 코드들이 반복됨에도 불구하고, Effect 들을 따로 분리하는것이 옳다. 도시, 구역인 다른 두가지를 동기화하기 때문에.
+대신 ShippingForm 컴포넌트를 useData라는 커스텀 Hook을 통해 공통된 로직을 추출할 수 있다.
+
+```jsx
+function useData(url) {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    if (url) {
+      let ignore = false;
+      fetch(url)
+        .then(response => response.json())
+        .then(json => {
+          if (!ignore) {
+            setData(json);
+          }
+        });
+      return () => {
+        ignore = true;
+      };
+    }
+  }, [url]);
+  return data;
+}
+```
+
+### 커스텀 훅의 이름 짓기
+
+- 이상적인 커스텀 훅의 이름 짓기의 좋은 예:
+명확한 네이밍
+    - useData(url)
+    - useImpressionLog(eventName, extraData)
+    - useChatRoom(options)
+    
+    외부시스템과 동기화할때는, 해당 시스템을 특정하는 용어 사용하기
+    
+    - useMediaQuery(query)
+    - useSocket(url)
+    - useIntersectionObserver(ref, options)
+- 안좋은 예:
+useEffect API 그 자체를 위한 대책이나 편리하게 감싸는 용도로 동작하는 커스텀 “생명 주기” Hook을 생성하거나 사용하는 것을 피하기.
+    - useMount(fn)
+    - useEffectOnce(fn)
+    - useUpdateEffect(fn)
+
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/b08e7419-4fd5-4a8b-9478-184d8f32f525/b9272a73-609d-4dda-914c-e5bbb5369d64/Untitled.png)
+
+위의 코드와 같이 컴포넌트에서 props 를 받아올때, options 라는 객체를 그 컴포넌트내에서 구조분해할당해주면, 이 컴포넌트가 리랜더링 될때마다 이 구조분해할당 부분이 실행된다. 근데, prop 자체를 function ChatRoom({options:{roomId, severIrl}})
+
+이런식으로 작성한다면 이부분은한번만 실행된다. 그리고 이렇게 해놓으면roomId, serverUrl 을 이 컴포넌트 내에서 사용할 수 있는데, options 객체 자체를 사용하려면 
+
+```jsx
+function ChatRoom({options, options:{roomId, severIrl}})
+```
+
+이런식으로 작성하면 된다.
