@@ -46,3 +46,42 @@ function solution(lottos, win_nums) {
 
   return [switchToRank(max), switchToRank(min)];
 }
+
+//3. 추억 점수 https://school.programmers.co.kr/learn/courses/30/lessons/176963
+
+//3. 풀이
+function solution(name, yearning, photo) {
+  let answer = [];
+  const yearningScore = new Map();
+
+  for (let i = 0; i < name.length; i++) {
+    yearningScore.set(name[i], yearning[i]);
+  }
+
+  for (let j = 0; j < photo.length; j++) {
+    let sum = 0;
+
+    for (let k = 0; k < photo[j].length; k++) {
+      if (yearningScore.has(photo[j][k])) {
+        sum += yearningScore.get(photo[j][k]);
+      }
+    }
+    answer.push(sum);
+  }
+
+  return answer;
+}
+
+//4. 과일 장수 https://school.programmers.co.kr/learn/courses/30/lessons/135808
+
+//4. 풀이
+function solution(k, m, score) {
+  let answer = 0;
+  const sortScore = [...score].sort((a, b) => b - a);
+
+  for (let i = m - 1; i < score.length; i += m) {
+    answer += sortScore[i] * m;
+  }
+
+  return answer;
+}
