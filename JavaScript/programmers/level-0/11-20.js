@@ -175,12 +175,52 @@ function solution(n) {
 // 풀이
 function solution(my_string, queries) {
   for (const [start, end] of queries) {
-      my_string = reverseSubstring(my_string, start, end);
+    my_string = reverseSubstring(my_string, start, end);
   }
 
   return my_string;
 }
 
 function reverseSubstring(str, start, end) {
-  return str.substring(0, start) + str.substring(start, end + 1).split('').reverse().join('') + str.substring(end + 1);
+  return (
+    str.substring(0, start) +
+    str
+      .substring(start, end + 1)
+      .split("")
+      .reverse()
+      .join("") +
+    str.substring(end + 1)
+  );
+}
+
+// 18.로그인 성공? https://school.programmers.co.kr/learn/courses/30/lessons/120883
+
+//풀이 1. 생성자 Map 이용
+function solution(id_pw, db) {
+  const id = id_pw[0];
+  const pw = id_pw[1];
+  const dbMap = new Map();
+
+  for (let dbItem of db) {
+    dbMap.set(dbItem[0], dbItem[1]);
+  }
+
+  if (!dbMap.has(id)) return "fail";
+
+  if (dbMap.get(id) === pw) return "login";
+
+  return "wrong pw";
+}
+
+//풀이 2. filter 메서드 사용
+function solution(id_pw, db) {
+  let filterInfo = db.filter((item) => item[0] === id_pw[0]);
+
+  if (filterInfo.length === 0) {
+    return "fail";
+  }
+
+  let isCorrectPw = filterInfo[0][1] === id_pw[1];
+
+  return isCorrectPw ? "login" : "wrong pw";
 }
