@@ -224,3 +224,20 @@ function solution(id_pw, db) {
 
   return isCorrectPw ? "login" : "wrong pw";
 }
+
+//19. 특이한 정렬 https://school.programmers.co.kr/learn/courses/30/lessons/120880
+
+//풀이
+function solution(numlist, n) {
+  return numlist.sort((a, b) => Math.abs(n - a) - Math.abs(n - b) || b - a);
+}
+
+//20. A로 B 만들기 https://school.programmers.co.kr/learn/courses/30/lessons/120886
+
+//풀이
+function solution(before, after) {
+  const sortBefore = before.split("").sort().join("");
+  const sortAfter = after.split("").sort().join("");
+    
+  return sortBefore === sortAfter ? 1 : 0;
+}
