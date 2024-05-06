@@ -54,7 +54,7 @@ function solution(array) {
 
 //23. 7의 개수  https://school.programmers.co.kr/learn/courses/30/lessons/120912
 
-//풀이 1.
+//풀이
 function solution(array) {
   let answer = 0;
   const arr = array.join("").split("");
@@ -67,3 +67,14 @@ function solution(array) {
 
   return answer;
 }
+
+//24. 중복된 문자 제거 https://school.programmers.co.kr/learn/courses/30/lessons/120888
+
+//풀이 Set 사용
+function solution(my_string) {
+    const wordArr = my_string.split('');
+    let setStr = new Set(wordArr);
+    
+    return [...setStr].join("")
+}
+
