@@ -2,22 +2,21 @@
 
 //풀이
 function solution(A, B) {
-    let answer = -1;
-    if (A === B) return 0;
-    let arr = A.split("");
+  let answer = -1;
+  if (A === B) return 0;
+  let arr = A.split("");
 
-    for (let i = 0; i < arr.length; i++) {
-        const pop = arr.pop();
-        arr.unshift(pop);
-        if (arr.join("") === B) {
-            answer = i + 1;
-            break;
-        }
+  for (let i = 0; i < arr.length; i++) {
+    const pop = arr.pop();
+    arr.unshift(pop);
+    if (arr.join("") === B) {
+      answer = i + 1;
+      break;
     }
- 
-    return answer;
-}
+  }
 
+  return answer;
+}
 
 //22. 최빈값 구하기 https://school.programmers.co.kr/learn/courses/30/lessons/120812
 
@@ -72,9 +71,30 @@ function solution(array) {
 
 //풀이 Set 사용
 function solution(my_string) {
-    const wordArr = my_string.split('');
-    let setStr = new Set(wordArr);
-    
-    return [...setStr].join("")
+  const wordArr = my_string.split("");
+  let setStr = new Set(wordArr);
+
+  return [...setStr].join("");
 }
 
+//25. 문자열 잘라서 정렬하기 https://school.programmers.co.kr/learn/courses/30/lessons/181866
+
+function solution(myString) {
+  const sortArr = myString.split("x").sort();
+
+  return sortArr.filter((item) => item);
+}
+
+//26. 글자 지우기
+
+function solution(my_string, indices) {
+    let answer = '';
+    
+    for(let i = 0; i < my_string.length; i++){
+        if(!indices.includes(i)){
+            answer += my_string[i];
+        }
+    }
+
+    return answer;
+}
