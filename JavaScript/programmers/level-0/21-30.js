@@ -88,13 +88,63 @@ function solution(myString) {
 //26. 글자 지우기
 
 function solution(my_string, indices) {
-    let answer = '';
-    
-    for(let i = 0; i < my_string.length; i++){
-        if(!indices.includes(i)){
-            answer += my_string[i];
-        }
-    }
+  let answer = "";
 
-    return answer;
+  for (let i = 0; i < my_string.length; i++) {
+    if (!indices.includes(i)) {
+      answer += my_string[i];
+    }
+  }
+
+  return answer;
+}
+
+// 27. 컨트롤 제트 https://school.programmers.co.kr/learn/courses/30/lessons/120853
+function solution(s) {
+  let answer = 0;
+  let sArr = s.split(" ");
+
+  for (let i = 0; i < sArr.length; i++) {
+    const num = Number(sArr[i]);
+
+    if (num) {
+      answer += num;
+    } else if (isNaN(num)) {
+      answer -= Number(sArr[i - 1]);
+    }
+  }
+
+  return answer;
+}
+
+//28. 가까운 수
+
+// 정수배열 array[] 에서 각 요소에서 n 을 빼주고, 절대값으로 변환해서 배열에 담는다.
+// 그 절대값이 가장 작은것이 들어있는 곳의 인덱스가 제일 가까운 수.
+// array에서 그 인덱스 자리에 있는 수를 return 한다. 같은 차이가 나는 숫자들이 있다면, 더 작은 수를 return 한다.
+
+//풀이 1.
+function solution(array, n) {
+  let answer = 0;
+  let sortedArray = array.sort();
+  let minDiff = Number.MAX_VALUE;
+
+  for (let num of sortedArray) {
+    let diff = Math.abs(n - num);
+
+    if (minDiff > diff) {
+      answer = num;
+      minDiff = diff;
+    }
+  }
+
+  return answer;
+}
+
+//풀이 2.
+function solution(array, n) {
+  const arr = array.sort().map((num) => Math.abs(num - n));
+  const min = Math.min(...arr);
+  const idx = arr.findIndex((item) => item === min);
+  return array[idx];
 }
