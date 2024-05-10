@@ -142,9 +142,45 @@ function solution(array, n) {
 }
 
 //풀이 2.
-function solution(array, n) {
-  const arr = array.sort().map((num) => Math.abs(num - n));
-  const min = Math.min(...arr);
-  const idx = arr.findIndex((item) => item === min);
-  return array[idx];
+// function solution(array, n) {
+//   const arr = array.sort().map((num) => Math.abs(num - n));
+//   const min = Math.min(...arr);
+//   const idx = arr.findIndex((item) => item === min);
+//   return array[idx];
+// }
+
+//29. 숨어있는 숫자의 덧셈 (2) https://school.programmers.co.kr/learn/courses/30/lessons/120864
+
+function solution(my_string) {
+  let answer = 0;
+  let temp = "";
+  let myString = my_string + "a";
+
+  for (let tempChar of myString) {
+    if (isNaN(tempChar)) {
+      answer += Number(temp);
+      temp = "";
+      continue;
+    }
+
+    temp += tempChar;
+  }
+
+  return answer;
+}
+
+//30. 배열 회전시키기 https://school.programmers.co.kr/learn/courses/30/lessons/120844
+
+function solution(numbers, direction) {
+  let answer = [...numbers];
+
+  for (let i = 0; i < 1; i++) {
+    if (direction === "right") {
+      answer.unshift(answer.pop());
+    } else {
+      answer.push(answer.shift());
+    }
+  }
+
+  return answer;
 }
