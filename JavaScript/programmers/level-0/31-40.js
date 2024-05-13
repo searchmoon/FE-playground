@@ -60,9 +60,6 @@ function solution(s) {
   return answer.split("").sort().join("");
 }
 
-
-
-
 //33. 문자열 뒤집기 https://school.programmers.co.kr/learn/courses/30/lessons/181905
 
 function solution(my_string, s, e) {
@@ -80,6 +77,48 @@ function solution(intStrs, k, s, l) {
   for (let item of intStrs) {
     if (item.slice(s, l + s) > k) {
       answer.push(Number(item.slice(s, l + s)));
+    }
+  }
+
+  return answer;
+}
+
+//35. 특정 문자열로 끝나는 가장 긴 부분 문자열 찾기 https://school.programmers.co.kr/learn/courses/30/lessons/181872
+function solution(myString, pat) {
+  const indexOfStr = myString.lastIndexOf(pat);
+
+  return myString.slice(0, indexOfStr + pat.length);
+}
+
+//36. 1로 만들기 https://school.programmers.co.kr/learn/courses/30/lessons/181880
+
+//풀이 1.
+function solution(num_list) {
+  let answer = 0;
+  for (let num of num_list) {
+    if (num === 0) continue;
+    if (num > 15) {
+      answer += 4;
+    } else if (num > 7) {
+      answer += 3;
+    } else if (num > 3) {
+      answer += 2;
+    } else if (num > 1) {
+      answer += 1;
+    }
+    console.log(answer);
+  }
+  return answer;
+}
+
+//풀이2.
+function solution(num_list) {
+  let answer = 0;
+
+  for (let num of num_list) {
+    while (1 < num) {
+      num = parseInt(num / 2);
+      answer++;
     }
   }
 
