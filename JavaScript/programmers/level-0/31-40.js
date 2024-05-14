@@ -30,7 +30,7 @@ function solution(i, j, k) {
 //   return resultArr.length;
 // }
 
-//32. 한 번만 등장한 문자
+//32. 한 번만 등장한 문자 https://school.programmers.co.kr/learn/courses/30/lessons/120896
 // map 을 for문으로 돌릴때.
 // 반복문 안에서 key, value 쌍을 대상으로 순회할때,
 // -> for (let [key, value] of map) {}
@@ -39,6 +39,7 @@ function solution(i, j, k) {
 // value를 대상으로 순회할때,
 // -> for (let value of map.values()) {}
 
+//풀이 1. 생성자 Map을 이용
 function solution(s) {
   let answer = "";
   let map = new Map();
@@ -58,6 +59,58 @@ function solution(s) {
   }
 
   return answer.split("").sort().join("");
+}
+
+//풀이2.
+function solution(s) {
+  var answer = "";
+
+  let array = s.split("").sort();
+  array.push("!");
+
+  let temp = array[0];
+  let count = 1;
+
+  for (let i = 1; i < array.length; i++) {
+    let char = array[i];
+
+    if (char == temp) {
+      count++;
+      continue;
+    } else {
+      if (count == 1) {
+        answer += temp;
+      }
+
+      temp = char;
+      count = 1;
+    }
+  }
+
+  return answer;
+}
+
+//풀이 3. 풀이 2와 비슷
+function solution(s) {
+  let answer = [];
+  let sortArr = s.split("").sort();
+  sortArr.push("!");
+
+  let count = 1;
+  for (let i = 0; i < sortArr.length - 1; i++) {
+    if (sortArr[i] === sortArr[i + 1]) {
+      count++;
+      continue;
+    }
+    if (sortArr[i] !== sortArr[i + 1] && count === 1) {
+      answer.push(sortArr[i]);
+      continue;
+    } else {
+      count = 1;
+    }
+  }
+
+  return answer.join("");
 }
 
 //33. 문자열 뒤집기 https://school.programmers.co.kr/learn/courses/30/lessons/181905
@@ -124,3 +177,5 @@ function solution(num_list) {
 
   return answer;
 }
+
+//37. 
