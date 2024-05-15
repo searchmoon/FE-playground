@@ -178,4 +178,66 @@ function solution(num_list) {
   return answer;
 }
 
-//37. 
+//37. 2차원으로 만들기 https://school.programmers.co.kr/learn/courses/30/lessons/120842
+
+//풀이 1.
+function solution(num_list, n) {
+  let answer = [];
+
+  for (let i = 0; i < num_list.length; i += n) {
+    answer.push([]);
+    for (let j = 0; j < n; j++) {
+      console.log(i / n, i + j);
+      answer[parseInt(i / n)].push(num_list[i + j]);
+    }
+  }
+
+  return answer;
+}
+
+//풀이 2.
+function solution(num_list, n) {
+  const result = [];
+  for (let i = 0; i < num_list.length; i += n) {
+    result.push(num_list.slice(i, i + n));
+  }
+  return result;
+}
+
+//38. 배열 만들기 4 https://school.programmers.co.kr/learn/courses/30/lessons/181918
+
+function solution(arr) {
+  let stk = [];
+  let i = 0;
+
+  while (i < arr.length) {
+    if (stk.length === 0 || stk[stk.length - 1] < arr[i]) {
+      stk.push(arr[i]);
+      i++;
+    } else {
+      stk.pop();
+    }
+  }
+
+  return stk;
+}
+
+//39. 리스트 자르기 https://school.programmers.co.kr/learn/courses/30/lessons/181897
+
+function solution(n, slicer, num_list) {
+  let answer = [];
+
+  if (n === 1) {
+    answer = num_list.slice(0, slicer[1] + 1);
+  } else if (n === 2) {
+    answer = num_list.slice(slicer[0]);
+  } else if (n === 3) {
+    answer = num_list.slice(slicer[0], slicer[1] + 1);
+  } else if (n === 4) {
+    for (let i = slicer[0]; i <= slicer[1]; i += slicer[2]) {
+      answer.push(num_list[i]);
+    }
+  }
+
+  return answer;
+}
