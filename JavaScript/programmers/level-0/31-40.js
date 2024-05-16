@@ -241,3 +241,25 @@ function solution(n, slicer, num_list) {
 
   return answer;
 }
+
+//40. 빈 배열에 추가, 삭제하기 https://school.programmers.co.kr/learn/courses/30/lessons/181860
+
+function solution(arr, flag) {
+  let X = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (flag[i]) {
+      let leng = arr[i] * 2;
+
+      while (leng > 0) {
+        X.push(arr[i]);
+        leng--;
+      }
+    } else {
+      while (arr[i] > 0) {
+        X.pop();
+        arr[i]--;
+      }
+    }
+  }
+  return X;
+}
