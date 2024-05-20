@@ -72,3 +72,46 @@ const calculate = (inc, n = 1) => {
   }
   return result;
 };
+
+//46. 간단한 식 계산하기 https://school.programmers.co.kr/learn/courses/30/lessons/181865
+
+//풀이 1.
+function solution(binomial) {
+  const split = binomial.split(" ");
+  const firstNum = Number(split[0]);
+  const secondNum = Number(split[2]);
+  const operator = split[1];
+
+  if (operator === "+") {
+    return firstNum + secondNum;
+  } else if (operator === "-") {
+    return firstNum - secondNum;
+  } else if (operator === "*") {
+    return firstNum * secondNum;
+  }
+}
+
+//풀이 2.
+function solution(binomial) {
+  const split = binomial.split(" ");
+  const firstNum = Number(split[0]);
+  const secondNum = Number(split[2]);
+  const operator = split[1];
+
+  switch (operator) {
+    case "+":
+      return firstNum + secondNum;
+    case "-":
+      return firstNum - secondNum;
+    case "*":
+      return firstNum * secondNum;
+  }
+}
+
+//47. 외계행성의 나이 https://school.programmers.co.kr/learn/courses/30/lessons/120834
+function solution(age) {
+  const splitAge = String(age).split("");
+  const eng = "abcdefghijklmnopqrstuvwxyz";
+
+  return splitAge.map((item) => eng[item]).join("");
+}
