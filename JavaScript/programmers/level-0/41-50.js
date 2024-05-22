@@ -115,3 +115,16 @@ function solution(age) {
 
   return splitAge.map((item) => eng[item]).join("");
 }
+
+//48. 배열 만들기 3 https://school.programmers.co.kr/learn/courses/30/lessons/181895
+// 원본 배열을 변경하는 splice 를 쓰지않고, slice 를 써준다.
+function solution(arr, intervals) {
+  let answer = [];
+  let array = [...arr];
+
+  for (let item of intervals) {
+    answer.push(array.slice(item[0], item[1] + 1));
+  }
+
+  return answer.flat();
+}
