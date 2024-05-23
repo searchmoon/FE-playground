@@ -128,3 +128,33 @@ function solution(arr, intervals) {
 
   return answer.flat();
 }
+
+//49. 9로 나눈 나머지 https://school.programmers.co.kr/learn/courses/30/lessons/181914
+
+function solution(number) {
+  const arr = number.split("");
+  const sumNum = arr.reduce((acc, crr) => acc + Number(crr), 0);
+
+  return sumNum % 9;
+}
+
+//50. 합성수 찾기 https://school.programmers.co.kr/learn/courses/30/lessons/120846
+
+function solution(n) {
+  function isPrime(num) {
+    if (num < 2) return false;
+    for (let i = 2; i <= Math.sqrt(num); i++) {
+      if (num % i === 0) return false;
+    }
+    return true;
+  }
+  let count = 0;
+
+  for (let i = 4; i <= n; i++) {
+    if (!isPrime(i)) {
+      count++;
+    }
+  }
+
+  return count;
+}
