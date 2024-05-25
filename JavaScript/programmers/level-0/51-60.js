@@ -55,3 +55,27 @@ function solution(n) {
 
   return answer;
 }
+
+//53. 접미사 배열 https://school.programmers.co.kr/learn/courses/30/lessons/181909
+
+function solution(my_string) {
+    let answer = [];
+    for(let i = 0; i < my_string.length; i++){
+        answer.push(my_string.slice(i));
+    }
+    return answer.sort();
+}
+
+//54. 문자 개수 세기 https://school.programmers.co.kr/learn/courses/30/lessons/181902
+
+function solution(my_string) {
+    let arr = Array(52).fill(0);
+    const str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
+    for(let character of my_string){
+        let index = str.indexOf(character);
+        arr[index]++;
+    }
+
+    return arr;
+}
