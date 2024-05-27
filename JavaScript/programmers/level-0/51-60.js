@@ -126,3 +126,27 @@ function solution(q, r, code) {
 
   return answer;
 }
+
+//58. 세로 읽기 https://school.programmers.co.kr/learn/courses/30/lessons/181904
+function solution(str, m, c) {
+  let answer = "";
+
+  for (let i = 0; i < str.length; i += m) {
+    answer += str.slice(i, i + m).split("")[c - 1];
+  }
+
+  return answer;
+}
+
+// 59. 등차수열의 특정한 항만 더하기 https://school.programmers.co.kr/learn/courses/30/lessons/181931
+function solution(a, d, included) {
+  let answer = 0;
+
+  for (let i = 0; i < included.length; i++) {
+    if (included[i]) {
+      answer += a + i * d;
+    }
+  }
+
+  return answer;
+}
