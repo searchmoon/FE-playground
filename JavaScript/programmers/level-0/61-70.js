@@ -13,3 +13,59 @@ function solution(n) {
     }
   }
 }
+
+//62. 이차원 배열 대각선 순회하기 https://school.programmers.co.kr/learn/courses/30/lessons/181829
+function solution(board, k) {
+  let answer = 0;
+
+  for (let i = 0; i < board.length; i++) {
+    for (let j = 0; j < board[0].length; j++) {
+      if (i + j <= k) {
+        answer += board[i][j];
+      }
+    }
+  }
+
+  return answer;
+}
+
+// 63. 세 개의 구분자 https://school.programmers.co.kr/learn/courses/30/lessons/181862
+// 풀이 1. 정규표현식 사용. [abc] 는 문자 클래스. "a", "b", "c" 중 하나와 일치하는 패턴을 나타낸다.
+function solution(myStr) {
+  let parts = myStr.split(/[abc]/);
+
+  let filteredParts = parts.filter((part) => part.length > 0);
+
+  if (filteredParts.length === 0) {
+    return ["EMPTY"];
+  }
+
+  return filteredParts;
+}
+
+// 풀이 2.
+function solution(myStr) {
+  let answer = [];
+  let tempStr = "";
+
+  for (let char of myStr) {
+    if (char === "a" || char === "b" || char === "c") {
+      if (tempStr.length > 0) {
+        answer.push(tempStr);
+        tempStr = "";
+      }
+    } else {
+      tempStr += char;
+    }
+  }
+
+  if (tempStr.length > 0) {
+    answer.push(tempStr);
+  }
+
+  if (answer.length === 0) {
+    return ["EMPTY"];
+  }
+
+  return answer;
+}
