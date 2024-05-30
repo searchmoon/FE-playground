@@ -69,3 +69,20 @@ function solution(myStr) {
 
   return answer;
 }
+
+//64. 다른 사람의 풀이 https://school.programmers.co.kr/learn/courses/30/lessons/181857
+//풀이 1.
+function solution(arr) {
+  let length = arr.length;
+
+  let newLength = 1;
+  while (newLength < length) {
+    newLength *= 2;
+  }
+
+  while (arr.length < newLength) {
+    arr.push(0);
+  }
+
+  return arr;
+}
