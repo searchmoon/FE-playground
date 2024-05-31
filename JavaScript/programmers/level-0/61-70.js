@@ -86,3 +86,16 @@ function solution(arr) {
 
   return arr;
 }
+
+// 65. 문자열이 몇 번 등장하는지 세기 https://school.programmers.co.kr/learn/courses/30/lessons/181871
+function solution(myString, pat) {
+  let count = 0;
+  let index = 0;
+
+  while ((index = myString.indexOf(pat, index)) !== -1) {
+    count++;
+    index++;
+  }
+
+  return count;
+}
