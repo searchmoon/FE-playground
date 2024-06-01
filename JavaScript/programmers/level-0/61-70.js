@@ -99,3 +99,36 @@ function solution(myString, pat) {
 
   return count;
 }
+
+//66. 왼쪽 오른쪽 https://school.programmers.co.kr/learn/courses/30/lessons/181890
+// 풀이 1.
+function solution(str_list) {
+  let list = [...str_list];
+  let answer = [];
+
+  for (let i = 0; i < list.length; i++) {
+    if (list[i] === "l") {
+      answer = list.slice(0, i);
+      break;
+    } else if (list[i] === "r") {
+      answer = list.slice(i + 1);
+      break;
+    }
+  }
+
+  return answer;
+}
+
+//풀이 2.
+function solution(str_list) {
+  let list = [...str_list];
+
+  for (let i = 0; i < list.length; i++) {
+    if (list[i] === "l") {
+      return list.slice(0, i);
+    } else if (list[i] === "r") {
+      return list.slice(i + 1);
+    }
+  }
+  return [];
+}
