@@ -132,3 +132,34 @@ function solution(str_list) {
   }
   return [];
 }
+
+//67. 구슬을 나누는 경우의 수 https://school.programmers.co.kr/learn/courses/30/lessons/120840
+// 풀이 1.
+function solution(balls, share) {
+  if (share > balls) return 0;
+  if (share === 0 || share === balls) return 1;
+
+  let num = 1;
+  for (let i = 0; i < share; i++) {
+    num *= balls - i;
+    num /= i + 1;
+  }
+
+  return num;
+}
+
+//풀이 2. Math.round() 사용한 풀이
+const factorial = (n) => {
+  let num = 1;
+  while (n) {
+    num *= n;
+    n--;
+  }
+  return num;
+};
+
+function solution(balls, share) {
+  return Math.round(
+    factorial(balls) / (factorial(balls - share) * factorial(share))
+  );
+}
