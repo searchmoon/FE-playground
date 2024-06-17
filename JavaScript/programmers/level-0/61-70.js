@@ -163,3 +163,47 @@ function solution(balls, share) {
     factorial(balls) / (factorial(balls - share) * factorial(share))
   );
 }
+
+// 풀이 3. BigInt() 를 사용하여 더 정확한 값 얻기
+const factorial2 = (n) => {
+  let num = BigInt(1);
+  for (let i = BigInt(n); i > 1; i--) {
+    num *= 1;
+  }
+  return num;
+};
+
+function solution(balls, share) {
+  return Number(
+    factorial(balls) / (factorial(balls - share) * factorial(share))
+  );
+}
+
+//68. 삼각형의 완성조건 (2)https://school.programmers.co.kr/learn/courses/30/lessons/120868?language=javascript
+// 풀이1.
+function solution(sides) {
+  const [a, b] = sides;
+  const minSide = Math.min(a, b);
+  const maxSide = Math.max(a, b);
+
+  const case1 = a + b - maxSide - 1;
+
+  const case2 = minSide;
+
+  return case1 + case2;
+}
+//풀이 2. 1번이 더 효율적. 사실, counter 로 세 줄 필요가 없다.
+function solution(sides) {
+  let counter = 0;
+  const max = Math.max(...sides);
+  const min = Math.min(...sides);
+
+  for (let i = max - min + 1; i <= max; i++) {
+    counter++;
+  }
+  for (let i = max + 1; i < max + min; i++) {
+    counter++;
+  }
+
+  return counter;
+}
