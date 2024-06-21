@@ -207,3 +207,18 @@ function solution(sides) {
 
   return counter;
 }
+
+//69. 수열과 구간 쿼리3 https://school.programmers.co.kr/learn/courses/30/lessons/181924
+//풀이1. 
+function solution(arr, queries) {
+  for (let query of queries) {
+    let i = query[0];
+    let j = query[1];
+    
+    let temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  }
+  
+  return arr;
+}
