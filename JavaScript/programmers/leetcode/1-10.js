@@ -35,3 +35,19 @@ let findMaxK = function (nums) {
 
   return answer;
 };
+
+//3. 9. Palindrome Number https://leetcode.com/problems/palindrome-number/description/
+
+let isPalindrome = function(x) {
+  const reverse = String(x).split("").reverse().join("");
+
+  return reverse == x ? true : false;
+};
+
+//4. 58. Length of Last Word https://leetcode.com/problems/length-of-last-word/description/
+let lengthOfLastWord = function(s) {
+  const words = s.trim().split(' ');
+
+  return words[words.length - 1].length;
+};
+
