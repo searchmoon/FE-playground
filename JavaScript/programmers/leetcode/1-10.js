@@ -51,3 +51,17 @@ let lengthOfLastWord = function(s) {
   return words[words.length - 1].length;
 };
 
+//5. 136. Single Number https://leetcode.com/problems/single-number/description/
+// XOR 연산
+let singleNumber = function(nums) {
+  let result = 0;
+  for (let num of nums) {
+    result ^= num;
+  }
+  return result;
+};
+
+//6. 2703. Return Length of Arguments Passed https://leetcode.com/problems/return-length-of-arguments-passed/
+let argumentsLength = function(...args) {
+  return args.length;
+};
