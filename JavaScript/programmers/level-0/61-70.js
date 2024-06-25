@@ -209,16 +209,32 @@ function solution(sides) {
 }
 
 //69. 수열과 구간 쿼리3 https://school.programmers.co.kr/learn/courses/30/lessons/181924
-//풀이1. 
+//풀이1.
 function solution(arr, queries) {
   for (let query of queries) {
     let i = query[0];
     let j = query[1];
-    
+
     let temp = arr[i];
     arr[i] = arr[j];
     arr[j] = temp;
   }
-  
+
   return arr;
+}
+
+//70. 배열 만들기 6 https://school.programmers.co.kr/learn/courses/30/lessons/181859
+
+function solution(arr) {
+  const newArr = [];
+
+  for (const num of arr) {
+    if (newArr.length > 0 && newArr[newArr.length - 1] === num) {
+      newArr.pop();
+    } else {
+      newArr.push(num);
+    }
+  }
+
+  return newArr.length ? newArr : [-1];
 }
