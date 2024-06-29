@@ -20,33 +20,51 @@ function solution(strArr) {
   return answer;
 }
 
-
 //72. 조건에 맞게 수열 변환하기 2 https://school.programmers.co.kr/learn/courses/30/lessons/181881
 
 function solution(arr) {
   let answer = 0;
 
   while (true) {
-      let prevArr = [...arr];
-      let newArr = [];
+    let prevArr = [...arr];
+    let newArr = [];
 
-      for (let num of arr) {
-          if (num >= 50 && num % 2 === 0) {
-              newArr.push(num / 2);
-          } else if (num < 50 && num % 2 === 1) {
-              newArr.push(num * 2 + 1);
-          } else {
-              newArr.push(num);
-          }
+    for (let num of arr) {
+      if (num >= 50 && num % 2 === 0) {
+        newArr.push(num / 2);
+      } else if (num < 50 && num % 2 === 1) {
+        newArr.push(num * 2 + 1);
+      } else {
+        newArr.push(num);
       }
+    }
 
-      if (prevArr.every((val, index) => val === newArr[index])) {
-          break;
-      }
+    if (prevArr.every((val, index) => val === newArr[index])) {
+      break;
+    }
 
-      arr = newArr;
-      answer++;
+    arr = newArr;
+    answer++;
   }
 
   return answer;
+}
+
+//73. 코드 처리하기 https://school.programmers.co.kr/learn/courses/30/lessons/181932
+
+function solution(code) {
+  let mode = 0; 
+  let ret = []; 
+
+  for (let i = 0; i < code.length; i++) {
+    if (code[i] === "1") {
+      mode = 1 - mode;
+    } else {
+      if ((mode === 0 && i % 2 === 0) || (mode === 1 && i % 2 === 1)) {
+        ret.push(code[i]);
+      }
+    }
+  }
+
+  return ret.join("") || "EMPTY";
 }
