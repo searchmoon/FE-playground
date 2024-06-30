@@ -68,3 +68,25 @@ function solution(code) {
 
   return ret.join("") || "EMPTY";
 }
+
+//74. 등수 매기기 https://school.programmers.co.kr/learn/courses/30/lessons/120882
+function solution(score) {
+  let answer = [];
+  let aver = [];
+  let rank = [];
+
+  for (let item of score) {
+    aver.push((item[0] + item[1]) / 2);
+  }
+
+  const sorted = [...aver].sort((a, b) => b - a);
+  const uniqueSorted = sorted.map((value, i) => [value, i]);// 중복제거
+
+  for (let item of score) {
+    const avg = (item[0] + item[1]) / 2;
+    const idx = uniqueSorted.find((pair) => pair[0] === avg)[1];
+    rank.push(idx + 1);
+  }
+
+  return rank;
+}
