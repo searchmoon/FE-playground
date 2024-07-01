@@ -90,3 +90,18 @@ function solution(score) {
 
   return rank;
 }
+
+//75. 외계어 사전 https://school.programmers.co.kr/learn/courses/30/lessons/120869
+
+function solution(spell, dic) {
+  let sortSpell = spell.sort().join("");
+  
+  for(let word of dic){
+      let sortWord = word.split("").sort().join("")
+      if(sortWord === sortSpell){
+          return 1;
+      }
+  }
+  
+  return 2;
+}
